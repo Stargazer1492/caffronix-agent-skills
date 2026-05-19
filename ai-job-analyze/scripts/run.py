@@ -1,16 +1,42 @@
+#!/usr/bin/env python3
 from __future__ import annotations
 
 import argparse
-import sys
+import platform
+import shutil
 from pathlib import Path
 
 
+SKILL_NAME = "ai-job-analyze"
+DATA_ROOT_NAME = "caffronix-agent-skills"
 SKILL_ROOT = Path(__file__).resolve().parents[1]
-SRC_ROOT = SKILL_ROOT / "src"
-if str(SRC_ROOT) not in sys.path:
-    sys.path.insert(0, str(SRC_ROOT))
 
-from ai_job_analyze.runtime import build_runtime_summary  # noqa: E402
+
+def workspace_root() -> Path:
+    return Path.cwd()
+
+
+def skill_workspace_dir(root: Path | None = None) -> Path:
+    base = root or workspace_root()
+    return base / DATA_ROOT_NAME / SKILL_NAME
+
+
+def runtime_dir(root: Path | None = None) -> Path:
+    return skill_workspace_dir(root) / "runtime"
+
+
+def build_runtime_summary() -> dict[str, str]:
+    workspace = workspace_root()
+    runtime = runtime_dir(workspace)
+    return {
+        "os": platform.system(),
+        "skill_root": str(SKILL_ROOT),
+        "workspace_root": str(workspace),
+        "skill_workspace_dir": str(skill_workspace_dir(workspace)),
+        "runtime_dir": str(runtime),
+        "runtime_exists": str(runtime.exists()),
+        "uv": shutil.which("uv") or "not found",
+    }
 
 
 def command_doctor(args: argparse.Namespace) -> int:
