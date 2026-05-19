@@ -60,6 +60,8 @@ url_template = "https://zhaopin.meituan.com/web/social?keyword={query}&pageNo={p
 query_param = "keyword"
 page_param = "pageNo"
 page_start = 1
+api_url = "https://zhaopin.meituan.com/api/official/job/getJobList"
+hiring_type = "1_1"
 pagination_mode = "query_param"
 
 [sources.meituan.campus]
@@ -68,6 +70,8 @@ url_template = "https://zhaopin.meituan.com/web/campus?keyword={query}&pageNo={p
 query_param = "keyword"
 page_param = "pageNo"
 page_start = 1
+api_url = "https://zhaopin.meituan.com/api/official/job/getJobList"
+hiring_type = "2_2"
 pagination_mode = "query_param"
 
 [sources.tencent.social]
@@ -76,6 +80,7 @@ url_template = "https://careers.tencent.com/search.html?index={page}&keyword={qu
 query_param = "keyword"
 page_param = "index"
 page_start = 1
+api_url = "https://careers.tencent.com/tencentcareer/api/post/Query"
 pagination_mode = "query_param"
 
 [sources.tencent.campus]
@@ -83,6 +88,7 @@ entry_url = "https://careers.tencent.com/search.html"
 url_template = "https://careers.tencent.com/search.html?keyword={query}&query=at_2,at_3"
 query_param = "keyword"
 fixed_query = "at_2,at_3"
+api_url = "https://careers.tencent.com/tencentcareer/api/post/Query"
 pagination_mode = "needs_adapter_check"
 
 [sources.alibaba.social]
