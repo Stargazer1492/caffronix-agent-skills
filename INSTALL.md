@@ -44,16 +44,3 @@ https://github.com/Stargazer1492/caffronix-agent-skills/archive/refs/heads/main.
 ```bash
 python scripts/bootstrap.py init-workspace --workspace-root <宿主可写workspace>
 ```
-
-## 复制规则
-
-只复制 skill 目录本身。不要复制仓库根目录的 `.git/`、本地运行产物、临时目录或私有文件。
-
-不得复制：
-
-- `.env`
-- `cookie`
-- `token`
-- 浏览器 profile 或登录态
-- `caffronix-agent-skills/` 运行产物目录
-- `DESIGN.md`
