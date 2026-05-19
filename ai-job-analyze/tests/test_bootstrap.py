@@ -5,10 +5,11 @@ from pathlib import Path
 from scripts.bootstrap import ensure_workspace_dirs, runtime_environment, skill_workspace_dir, uv_install_hint
 
 
-def test_uv_install_hint_supports_macos_and_windows() -> None:
+def test_uv_install_hint_supports_macos_linux_and_windows() -> None:
     assert "brew install uv" in (uv_install_hint("Darwin") or "")
+    assert "astral.sh/uv/install.sh" in (uv_install_hint("Linux") or "")
     assert "install.ps1" in (uv_install_hint("Windows") or "")
-    assert uv_install_hint("Linux") is None
+    assert uv_install_hint("FreeBSD") is None
 
 
 def test_runtime_environment_is_workspace_local() -> None:

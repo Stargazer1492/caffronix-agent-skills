@@ -59,6 +59,8 @@ def runtime_environment(runtime: Path) -> dict[str, str]:
 def uv_install_hint(os_name: str) -> str | None:
     if os_name == "Darwin":
         return "brew install uv\n# or\ncurl -LsSf https://astral.sh/uv/install.sh | sh"
+    if os_name == "Linux":
+        return "curl -LsSf https://astral.sh/uv/install.sh | sh"
     if os_name == "Windows":
         return 'powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"'
     return None
@@ -88,7 +90,7 @@ def check_status(workspace_root_arg: str | Path | None = None) -> BootstrapStatu
     runtime = runtime_dir(workspace_root)
     return BootstrapStatus(
         os_name=os_name,
-        supported_os=os_name in {"Darwin", "Windows"},
+        supported_os=os_name in {"Darwin", "Linux", "Windows"},
         skill_root=str(SKILL_ROOT),
         workspace_root=str(workspace_root),
         data_root_dir=str(data_root_dir(workspace_root)),
