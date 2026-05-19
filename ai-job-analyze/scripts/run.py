@@ -5,11 +5,59 @@ import argparse
 import platform
 import shutil
 from pathlib import Path
+from typing import Any
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    tomllib = None
 
 
 SKILL_NAME = "ai-job-analyze"
 DATA_ROOT_NAME = "caffronix-agent-skills"
 SKILL_ROOT = Path(__file__).resolve().parents[1]
+SCRIPT_DIR = Path(__file__).resolve().parent
+CONFIG_PATH = SCRIPT_DIR / "config.toml"
+
+DEFAULT_CONFIG: dict[str, Any] = {
+    "crawl": {
+        "default_companies": ["bytedance", "alibaba", "tencent", "meituan"],
+        "default_channel": "social",
+        "default_query": "AI",
+        "max_jobs_per_task": 120,
+    },
+    "report": {
+        "default_format": "html",
+    },
+    "output": {
+        "work_dir": "caffronix-agent-skills/ai-job-analyze/work",
+    },
+}
+
+
+def merge_config(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+    merged = dict(base)
+    for key, value in override.items():
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = merge_config(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
+
+
+def load_config() -> dict[str, Any]:
+    if tomllib is None or not CONFIG_PATH.exists():
+        return DEFAULT_CONFIG
+    with CONFIG_PATH.open("rb") as config_file:
+        loaded = tomllib.load(config_file)
+    return merge_config(DEFAULT_CONFIG, loaded)
+
+
+def config_value(config: dict[str, Any], section: str, key: str, default: Any) -> Any:
+    section_value = config.get(section, {})
+    if not isinstance(section_value, dict):
+        return default
+    return section_value.get(key, default)
 
 
 def workspace_root() -> Path:
@@ -35,6 +83,8 @@ def build_runtime_summary() -> dict[str, str]:
         "skill_workspace_dir": str(skill_workspace_dir(workspace)),
         "runtime_dir": str(runtime),
         "runtime_exists": str(runtime.exists()),
+        "config_path": str(CONFIG_PATH),
+        "config_exists": str(CONFIG_PATH.exists()),
         "uv": shutil.which("uv") or "not found",
     }
 
@@ -67,6 +117,16 @@ def command_report(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    config = load_config()
+    default_companies = config_value(config, "crawl", "default_companies", ["bytedance", "alibaba", "tencent", "meituan"])
+    if isinstance(default_companies, list):
+        default_companies = ",".join(str(company) for company in default_companies)
+    default_channel = str(config_value(config, "crawl", "default_channel", "social"))
+    default_query = str(config_value(config, "crawl", "default_query", "AI"))
+    max_jobs = int(config_value(config, "crawl", "max_jobs_per_task", 120))
+    output_dir = str(config_value(config, "output", "work_dir", "caffronix-agent-skills/ai-job-analyze/work"))
+    default_format = str(config_value(config, "report", "default_format", "html"))
+
     parser = argparse.ArgumentParser(description="Run ai-job-analyze skill commands.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -74,16 +134,16 @@ def build_parser() -> argparse.ArgumentParser:
     doctor.set_defaults(func=command_doctor)
 
     crawl = subparsers.add_parser("crawl", help="planned crawl stage for public job pages")
-    crawl.add_argument("--companies", default="bytedance,alibaba,tencent,meituan")
-    crawl.add_argument("--channel", choices=("campus", "social", "both"), default="social")
-    crawl.add_argument("--query", default="AI")
-    crawl.add_argument("--max-jobs", type=int, default=120)
-    crawl.add_argument("--output-dir", default="caffronix-agent-skills/ai-job-analyze/work")
+    crawl.add_argument("--companies", default=default_companies)
+    crawl.add_argument("--channel", choices=("campus", "social", "both"), default=default_channel)
+    crawl.add_argument("--query", default=default_query)
+    crawl.add_argument("--max-jobs", type=int, default=max_jobs)
+    crawl.add_argument("--output-dir", default=output_dir)
     crawl.set_defaults(func=command_crawl)
 
     report = subparsers.add_parser("report", help="planned deterministic report render stage")
     report.add_argument("--input-dir", default="")
-    report.add_argument("--output", choices=("html", "png", "both"), default="html")
+    report.add_argument("--output", choices=("html", "png", "both"), default=default_format)
     report.set_defaults(func=command_report)
 
     return parser

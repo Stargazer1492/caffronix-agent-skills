@@ -18,9 +18,9 @@
 ## 输入
 
 - 用户分析问题。
-- `config.toml` 中的默认公司、默认渠道、默认查询词。
-- `config.toml` 中的 `crawl.max_jobs_per_task`。
-- `config.toml` 中的 `sources.*` 来源契约。
+- `scripts/config.toml` 中的默认公司、默认渠道、默认查询词。
+- `scripts/config.toml` 中的 `crawl.max_jobs_per_task`。
+- `scripts/config.toml` 中的 `sources.*` 来源契约。
 
 ## 输出
 

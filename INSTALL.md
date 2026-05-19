@@ -56,19 +56,19 @@ https://github.com/Stargazer1492/caffronix-agent-skills/archive/refs/heads/main.
 允许复制：
 
 - `SKILL.md`
-- `config.toml`
 - `scripts/`
 - `references/`
 - `assets/`
 - `agents/`
 
-其中 `SKILL.md` 必须存在；`config.toml`、`scripts/`、`references/`、`assets/`、`agents/` 按 skill 实际内容存在时复制。
+其中 `SKILL.md` 必须存在；`scripts/`、`references/`、`assets/`、`agents/` 按 skill 实际内容存在时复制。配置文件如果存在，应放在 `scripts/` 内随脚本一起复制，不在 skill 根目录单独放置。
 
 不要复制：
 
 - `src/`
 - `tests/`
 - `pyproject.toml`
+- 根目录 `config.toml`、`config.yaml` 或 `config.yml`
 - `DESIGN.md`
 - 仓库根目录文件
 - 未在白名单中的任意目录或文件

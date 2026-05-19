@@ -9,7 +9,7 @@
 - `<workspace-root>/caffronix-agent-skills/ai-job-analyze/work/{run_id}/raw_jobs.jsonl`
 - `<workspace-root>/caffronix-agent-skills/ai-job-analyze/work/{run_id}/failures.jsonl`
 - 用户本次分析问题
-- `config.toml` 中的 `normalize.batch_size`
+- `scripts/config.toml` 中的 `normalize.batch_size`
 
 ## 输出
 

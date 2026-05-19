@@ -159,7 +159,7 @@ venv.bak/
 caffronix-agent-skills/
 
 # Local-only skill design notes
-ai-job-analyze/DESIGN.md
+DESIGN.md
 
 # Spyder project settings
 .spyderproject
