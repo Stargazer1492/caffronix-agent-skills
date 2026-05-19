@@ -29,6 +29,8 @@
 
 `report.html` 是默认必需产物。`report.png` 只有用户要求图片或配置启用图片导出时生成。
 
+抓取产物格式与抓取方式无关。无论岗位来自 Codex App 内置 Browser、`browser-use`、Computer Use，还是 `scripts/run.py crawl` fallback，都必须写入同一套文件和字段。
+
 ## 报告请求
 
 ```json

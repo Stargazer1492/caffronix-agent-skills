@@ -377,7 +377,7 @@ def command_crawl(args: argparse.Namespace) -> int:
     append_jsonl(output_dir / "raw_jobs.jsonl", jobs)
     append_jsonl(output_dir / "failures.jsonl", failures)
 
-    print("ai-job-analyze crawl completed")
+    print("ai-job-analyze fallback crawler completed")
     print(f"- jobs: {len(jobs)}")
     print(f"- failures: {len(failures)}")
     print(f"- output dir: {output_dir}")
@@ -403,13 +403,13 @@ def build_parser() -> argparse.ArgumentParser:
     output_dir = str(config_value(config, "output", "work_dir", "caffronix-agent-skills/ai-job-analyze/work"))
     default_format = str(config_value(config, "report", "default_format", "html"))
 
-    parser = argparse.ArgumentParser(description="Run ai-job-analyze skill commands.")
+    parser = argparse.ArgumentParser(description="Run ai-job-analyze fallback and utility commands.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     doctor = subparsers.add_parser("doctor", help="print local runtime readiness summary")
     doctor.set_defaults(func=command_doctor)
 
-    crawl = subparsers.add_parser("crawl", help="planned crawl stage for public job pages")
+    crawl = subparsers.add_parser("crawl", help="fallback crawler for public job pages")
     crawl.add_argument("--companies", default=default_companies)
     crawl.add_argument("--channel", choices=("campus", "social", "both"), default=default_channel)
     crawl.add_argument("--query", default=default_query)

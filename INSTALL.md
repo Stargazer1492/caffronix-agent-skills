@@ -16,7 +16,7 @@ https://github.com/Stargazer1492/caffronix-agent-skills/archive/refs/heads/main.
 
 | skill 名称 | 源目录 | 说明 |
 |---|---|---|
-| `ai-job-analyze` | `ai-job-analyze/` | 抓取并分析公开招聘站点中的 AI 岗位。当前 v0 已实现腾讯、美团；字节、阿里会输出失败项，等待适配器补齐。 |
+| `ai-job-analyze` | `ai-job-analyze/` | 按当前 agent 能力优先使用 Browser、browser-use 或 Computer Use 抓取公开招聘页并分析 AI 岗位；脚本 crawler 仅作为 fallback。 |
 
 ## 安装目标目录
 
