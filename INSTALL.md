@@ -20,12 +20,14 @@ https://github.com/Stargazer1492/caffronix-agent-skills/archive/refs/heads/main.
 
 ## 安装目标目录
 
-优先安装到当前宿主支持的用户级 skills 目录：
+优先安装到当前宿主支持的原生 skills 目录：
 
-| 宿主 | 用户级目录 |
+| 宿主 | 推荐安装目录 |
 |---|---|
 | Codex | `~/.agents/skills/{skill-name}` |
 | Claude Code | `~/.claude/skills/{skill-name}` |
+| OpenClaw | `<OpenClaw active workspace>/skills/{skill-name}` |
+| Hermes | `~/.hermes/skills/{skill-name}` |
 
 如果无法判断宿主，安装到当前项目级目录：
 
@@ -33,13 +35,22 @@ https://github.com/Stargazer1492/caffronix-agent-skills/archive/refs/heads/main.
 <当前项目>/.agents/skills/{skill-name}
 ```
 
+安装前必须确认目标 skills 根目录可写。做法是先创建目标根目录，再写入并删除一个临时探测文件：
+
+```text
+<目标 skills 根目录>/.write-test
+```
+
+如果不可写，不要继续安装到该目录；改用当前宿主可写的项目级目录，或者让用户提供一个可写目录。
+
 ## 安装步骤
 
 1. 下载并解压仓库 zip。
 2. 根据用户要求的 `{skill-name}` 找到同名目录。
-3. 将该目录复制到目标 skills 目录。
-4. 确认目标目录下存在 `SKILL.md`。
-5. 如果该 skill 包含 `scripts/bootstrap.py`，用当前宿主可写 workspace 初始化：
+3. 判断当前宿主的目标 skills 根目录，并确认该目录可写。
+4. 将该目录复制到目标 skills 目录。
+5. 确认目标目录下存在 `SKILL.md`。
+6. 如果该 skill 包含 `scripts/bootstrap.py`，用当前宿主可写 workspace 初始化：
 
 ```bash
 python scripts/bootstrap.py init-workspace --workspace-root <宿主可写workspace>
