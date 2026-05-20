@@ -29,7 +29,7 @@ v1 渠道：
 
 ## 浏览器抓取路径
 
-当内置 Browser、`browser-use` 或 Computer Use 可用时，优先通过公开招聘页面完成以下动作：
+当 Playwright、内置 Browser、`browser-use`、Computer Use 或 Chrome plugin 可用时，优先通过公开招聘页面完成以下动作：
 
 - 打开公司和渠道对应入口。
 - 输入用户查询词。
@@ -42,7 +42,7 @@ v1 渠道：
 
 浏览器路径仍然必须遵守单次任务总量上限。浏览器路径不能读取或复用本地 cookie、登录态、浏览器 profile、令牌或账号权限。
 
-完整操作流程见 `references/browser-collection-sop.md`。
+完整操作流程见 `references/stage1-collection.md`。
 
 ## 来源与分页契约
 

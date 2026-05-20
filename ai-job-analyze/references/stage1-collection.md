@@ -1,8 +1,69 @@
-# 浏览器采集 SOP
+# Stage 1: 采集 SOP
 
 ## 目标
 
-当当前 agent 具备内置 Browser、`browser-use` 或 Computer Use 能力时，使用浏览器访问公开招聘页面，完成岗位搜索、详情页截图、正文提取和本地保存。
+当用户提出人工智能岗位分析需求时，先把问题拆成可执行的采集计划，再根据当前 agent 可用能力访问公开招聘页面，完成岗位搜索、详情页截图、正文提取和本地保存。
+
+## 任务拆解
+
+遇到以下情况时先执行任务拆解：
+
+- 用户只说“分析 AI 产品经理岗位”“对比大厂 AI 岗位”，没有指定公司。
+- 用户要求跨公司比较，但没有指定渠道。
+- 用户要求“AI 岗位市场”“大模型岗位趋势”等宽泛问题。
+- 用户给出分析问题，但没有给出 source URL。
+
+如果用户已经明确给出公司、渠道、关键词和 source URL，可以跳过拆解，直接形成采集计划。
+
+### 拆解输入
+
+- 用户分析问题。
+- 默认公司、默认渠道、默认查询词。
+- 本次任务的岗位数量上限。
+- `references/company-sources.md` 中的来源契约。
+
+### 拆解输出
+
+生成 `<workspace-root>/caffronix-agent-skills/ai-job-analyze/work/{run_id}/crawl_plan.json`，至少包含：
+
+```json
+{
+  "analysis_question": "对比四家公司 AI 产品经理岗位能力要求",
+  "query": "AI 产品经理",
+  "max_jobs_per_task": 120,
+  "sources": [
+    {
+      "company": "bytedance",
+      "channel": "social",
+      "source_key": "sources.bytedance.social",
+      "planned_jobs": 30,
+      "reason": "覆盖字节社招 AI 产品经理样本"
+    }
+  ]
+}
+```
+
+### 拆解规则
+
+1. 先识别用户问题里的岗位关键词，例如 `AI 产品经理`、`大模型应用`、`智能体`。
+2. 如果识别出多个关键词，拆成多个关键词批次；每个批次只查询 1 个关键词，避免不同关键词的搜索结果混在同一批样本中。
+3. 再识别比较维度，例如公司差异、校招/社招差异、城市分布、能力要求。
+4. 如果用户没有指定公司，默认使用字节、阿里、腾讯、美团。
+5. 如果用户没有指定渠道，默认使用社招；当问题明确比较校招和社招时使用两者。
+6. 根据可用来源生成 source 列表，跳过没有来源契约的组合。
+7. 把本次任务的岗位数量上限分配到各 source 和关键词批次。默认均分；如果用户问题明显聚焦某家公司、某个渠道或某个关键词，可以提高对应批次的计划样本量。
+8. 每个 source 的 `planned_jobs` 只是目标上限，不是保证数量。来源无结果、被验证码阻断或提前到底时，应停止该 source 并记录失败或样本不足。
+9. 全部 source 和关键词批次合计不得超过本次任务的岗位数量上限。
+
+## 工具优先级
+
+采集工具按稳定性、可复现性、并发能力和安全边界选择：
+
+1. Playwright：优先路径。适合公开页面的列表页和详情页采集、独立 tab、有限并发、截图、正文提取和结构化保存。
+2. Codex App 内置 Browser：第二优先级。适合 Codex App 内直接打开和检查页面；是否可用以当前会话实际暴露的 tools、plugins 和 skills 为准。
+3. `browser-use`：降级路径。它可以独立完成浏览器采集，但属于更高层的 agent 友好操作层，速度、确定性和并发能力通常不作为首选假设。
+4. Computer Use：视觉 UI 兜底。仅在必须通过可视界面操作时使用，并发度固定为 1。
+5. Chrome plugin：最后 fallback。仅当 Computer Use 不可用，或用户明确要求真实 Chrome 环境时使用；默认不要读取或依赖用户 Chrome profile、cookie、登录态或本地浏览器数据。
 
 ## 输入
 
@@ -18,13 +79,12 @@
 ```text
 <workspace-root>/caffronix-agent-skills/ai-job-analyze/work/{run_id}/
   crawl_plan.json
-  raw_jobs.jsonl
-  sources.json
+  crawl_result.json
+  jobs_index.jsonl
   failures.jsonl
   details/
-    {source_id}.txt
-    {source_id}.png
-    {source_id}.json
+    {job_id}.txt
+    {job_id}.png
 ```
 
 ## 执行流程
@@ -37,8 +97,8 @@
 6. 等待搜索结果稳定后，读取当前页岗位列表。每条列表项至少记录标题、城市、部门、更新时间、当前列表页 URL 和可点击元素定位方式。
 7. 对每个岗位点击 title 或岗位卡片进入详情页。
 8. 进入详情页后截图，并提取页面可见文字。
-9. 将详情页截图保存为 `details/{source_id}.png`，将详情页正文保存为 `details/{source_id}.txt`，将结构化元数据保存为 `details/{source_id}.json`。
-10. 将该岗位追加写入 `raw_jobs.jsonl`。`原始正文` 优先使用详情页完整文本；详情页无法进入时，才退回列表页摘要，并在 `failures.jsonl` 写入降级原因。
+9. 将详情页截图保存为 `details/{job_id}.png`，将详情页正文保存为 `details/{job_id}.txt`。
+10. 将该岗位追加写入 `jobs_index.jsonl`。索引只记录岗位元数据、详情链接、详情正文路径、截图路径和采集方式，不重复保存详情正文；详情页无法进入时，不把列表页摘要伪装成详情正文，只在 `failures.jsonl` 写入降级原因。
 11. 返回搜索结果页，继续下一个岗位。
 12. 如果当前列表页可用岗位数量不足用户要求，查看列表底部翻页控件：
     - 优先找“下一页”按钮并点击。
@@ -58,7 +118,7 @@
 
 - 不要继续尝试内置 Browser、Chrome 插件、`browser-use`、Computer Use、Playwright、CDP、curl 或其他命令行 HTTP 请求访问同一域名。
 - 在 `failures.jsonl` 记录 `阶段 = 宿主安全策略检查`，`原因 = 宿主浏览器安全策略拒绝访问该域名`，并保存原始报错摘要。
-- 在 `crawl_manifest.json` 中标记 `blocked_by_host_browser_policy = true`。
+- 在 `crawl_result.json` 中标记 `blocked_by_host_browser_policy = true`。
 - 告知用户可以在宿主 agent 或浏览器工具配置中解除该域名限制后重试，或手工打开网页并提供页面文本、截图或导出的岗位详情。
 - 如果任务包含多个公司或多个域名，只停止被策略拒绝的域名；其他未被拒绝的来源可以继续执行。
 
@@ -75,9 +135,11 @@
 
 推荐默认策略：
 
+- Playwright：并发度 2 到 4；如果目标站点加载不稳定或出现风控迹象，降为 1。
 - 内置 Browser：并发度 1 到 2。
-- `browser-use`：并发度 1 到 2。
+- `browser-use`：并发度 1；只有确认多 tab 稳定且不会混乱页面状态时，才提升到 2。
 - Computer Use：并发度固定为 1，因为它依赖可视 UI 状态。
+- Chrome plugin：并发度固定为 1，除非用户明确要求并确认可以使用真实 Chrome 多 tab。
 
 ## 分页识别规则
 
@@ -96,3 +158,7 @@
 - 不打开开发者工具、网络面板或应用存储面板获取登录态。
 - 如果页面要求登录、验证码、安全验证或权限授权，停止该来源并写入 `failures.jsonl`。
 - 如果宿主工具安全策略拒绝访问该域名，停止该来源并写入 `failures.jsonl`；不要改用其他路径绕过策略。
+
+## 与后续阶段的关系
+
+采集阶段必须把 `crawl_plan.json` 和 `crawl_result.json` 写入同一 run 目录。字段归一和报告阶段都应引用这两个文件，说明本次样本为什么这样分配、实际采集到了什么，以及哪些 source 未能达到计划样本量。

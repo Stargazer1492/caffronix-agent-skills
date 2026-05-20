@@ -16,7 +16,7 @@ Codex 官方 `$skill-installer` 支持 GitHub repo/path 时，优先直接使用
 
 | skill 名称 | 源目录 | 说明 |
 |---|---|---|
-| `ai-job-analyze` | `ai-job-analyze/` | 按当前 agent 能力优先使用 Browser、browser-use 或 Computer Use 抓取公开招聘页并分析 AI 岗位；脚本 crawler 仅作为 fallback。 |
+| `ai-job-analyze` | `ai-job-analyze/` | 按当前 agent 能力优先使用 Playwright 或 Browser 抓取公开招聘页并分析 AI 岗位，再按需降级到 browser-use、Computer Use 或 Chrome plugin。 |
 
 ## 安装原则
 

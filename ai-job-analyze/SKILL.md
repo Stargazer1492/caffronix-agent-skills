@@ -1,6 +1,6 @@
 ---
 name: ai-job-analyze
-description: 基于当前 agent 可用浏览器能力采集公开招聘站点中的人工智能岗位，分析校招或社招机会，并生成本地优先的洞察产物。依次使用 Codex App 内置 Browser、browser-use 或 Computer Use 浏览公开页面并抽取页面可见数据。适用于用户要求收集人工智能岗位、比较校招/社招渠道、或基于公开招聘页生成岗位市场分析的场景。
+description: 基于当前 agent 可用浏览器能力采集公开招聘站点中的人工智能岗位，分析校招或社招机会，并生成本地优先的洞察产物。优先使用 Playwright 或 Codex App 内置 Browser，再按需降级到 browser-use、Computer Use 或 Chrome plugin 浏览公开页面并抽取页面可见数据。适用于用户要求收集人工智能岗位、比较校招/社招渠道、或基于公开招聘页生成岗位市场分析的场景。
 ---
 
 # 人工智能岗位分析
@@ -11,13 +11,15 @@ description: 基于当前 agent 可用浏览器能力采集公开招聘站点中
 
 执行采集前，先检查当前宿主可用的 tools、plugins 和 skills，再按以下顺序选择路径。不要只根据操作系统决定路径；路由选择以当前会话实际可用能力为准。
 
-1. Codex App 内置 Browser 可用时，优先使用内置 Browser 打开公开招聘页面，搜索关键词、翻页、读取页面或 DOM 中的岗位信息。
-2. 内置 Browser 不可用但 `browser-use` 可用时，使用 `browser-use` 的默认浏览器访问公开页面；不要连接用户真实 Chrome profile，除非用户明确要求，因为本 skill 不需要 cookie、登录态或本地浏览器数据。
-3. 页面只能通过真实可视 UI 操作时，且 Computer Use 可用，才使用 Computer Use 进行点击、输入、滚动和截图识别。
-4. 如果任一浏览器工具返回宿主安全策略拒绝，例如 `Browser Use rejected this action due to browser security policy`、`The user has requested that ... should not be used`、禁止通过 workaround、CDP、alternate browser surface 或 indirect execution 达成同一结果，则该来源必须立即停止。不要再尝试其他浏览器、Computer Use、命令行 HTTP 请求或其他自动化路径访问同一域名。
-5. 所有浏览器路径都不可用或失败时，只生成失败摘要和原因，不伪造岗位数据。
+1. Playwright 可用时，优先使用 Playwright 访问公开招聘页面。它适合列表页和详情页的可复现采集、独立 tab、有限并发、截图和结构化文本提取。
+2. Codex App 内置 Browser 可用时，使用内置 Browser 打开公开招聘页面，搜索关键词、翻页、读取页面或 DOM 中的岗位信息。它是 Codex App 官方浏览器能力，但当前会话中是否暴露要以实际 tools、plugins 和 skills 为准。
+3. Playwright 和内置 Browser 都不可用，但 `browser-use` 可用时，使用 `browser-use` 的默认浏览器访问公开页面。它是可独立运行的浏览器自动化路径，但作为降级路径使用；不要连接用户真实 Chrome profile，除非用户明确要求。
+4. 页面只能通过真实可视 UI 操作时，且 Computer Use 可用，才使用 Computer Use 进行点击、输入、滚动和截图识别。Computer Use 依赖单一可视 UI 状态，不适合作为并发采集路径。
+5. Chrome plugin 只作为 Computer Use 不可用、或用户明确要求使用真实 Chrome 环境时的最后浏览器 fallback。默认不要使用用户真实 Chrome profile、cookie、登录态或本地浏览器数据来扩大抓取范围。
+6. 如果任一浏览器工具返回宿主安全策略拒绝，例如 `Browser Use rejected this action due to browser security policy`、`The user has requested that ... should not be used`、禁止通过 workaround、CDP、alternate browser surface 或 indirect execution 达成同一结果，则该来源必须立即停止。不要再尝试其他浏览器、Computer Use、命令行 HTTP 请求或其他自动化路径访问同一域名。
+7. 所有浏览器路径都不可用或失败时，只生成失败摘要和原因，不伪造岗位数据。
 
-不论使用哪条浏览器路径，最终产物都必须遵守 `references/output-contract.md`，写入同一套 `raw_jobs.jsonl`、`sources.json`、`failures.jsonl` 和 `crawl_manifest.json`。
+不论使用哪条浏览器路径，最终产物都必须遵守 `references/output-contract.md`，写入同一套 `crawl_plan.json`、`crawl_result.json`、`jobs_index.jsonl`、`failures.jsonl`、`details/`、`normalized_jobs.jsonl` 和报告文件。
 
 ## 工作流程
 
@@ -27,12 +29,12 @@ description: 基于当前 agent 可用浏览器能力采集公开招聘站点中
    - 查询词：例如 `人工智能产品经理`、`智能体`、`大模型应用`、`算法`
    - 分析问题：洞察需要优先回答的具体问题
 
-2. 如果用户只给出跨公司分析需求，没有明确公司、渠道或来源，先按 `references/task-decomposition-sop.md` 拆解任务，生成本次采集计划，并控制每轮采集规模，避免把多个公司、多个渠道和大量详情页塞进一个长任务。
+2. 如果用户只给出跨公司分析需求，没有明确公司、渠道或来源，先按 `references/stage1-collection.md` 拆解任务，生成本次采集计划，并控制每轮采集规模，避免把多个公司、多个渠道和大量详情页塞进一个长任务。
 
 3. 按阶段执行，不把采集、字段归一和洞察整理塞进一个长任务：
-   - 采集阶段：按“能力路由”使用浏览器能力，并按 `references/browser-collection-sop.md` 搜索、翻页、进入详情页、截图、提取正文和保存本地产物。
-   - 转换阶段：Codex App 读取采集产物，按 `references/normalization-sop.md` 分批完成字段归一。
-   - 洞察阶段：Codex App 根据归一后的岗位和用户问题生成洞察 JSON。
+   - 采集阶段：按“能力路由”使用浏览器能力，并按 `references/stage1-collection.md` 搜索、翻页、进入详情页、截图、提取正文和保存本地产物。
+   - 归一化阶段：Codex App 读取采集产物，按 `references/stage2-normalization.md` 分批完成字段归一。
+   - 分析与报告阶段：Codex App 按 `references/stage3-analyze-and-report.md` 根据归一后的岗位和用户问题生成 `report.json` 与报告。
 
 ## 运行规则
 
@@ -58,7 +60,7 @@ ref: main
 ## 参考文档
 
 - 新增或修改公司来源前先读 `references/company-sources.md`。
-- 修改浏览器采集、详情页截图、详情页正文提取或分页流程前先读 `references/browser-collection-sop.md`。
-- 修改跨公司任务拆解方式前先读 `references/task-decomposition-sop.md`。
-- 修改输出字段前先读 `references/output-contract.md`。
-- 修改字段归一流程前先读 `references/normalization-sop.md`。
+- 修改采集计划、浏览器采集、详情页截图、详情页正文提取或分页流程前先读 `references/stage1-collection.md`。
+- 修改字段归一流程前先读 `references/stage2-normalization.md`。
+- 修改分析方法或报告结构前先读 `references/stage3-analyze-and-report.md`。
+- 修改输出字段或产物类型前先读 `references/output-contract.md`。
