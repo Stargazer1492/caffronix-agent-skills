@@ -47,10 +47,3 @@ Codex 官方 `$skill-installer` 支持 GitHub repo/path 时，优先直接使用
 3. 不要手工指定或硬编码安装目录。Codex 官方安装器会安装到 `$CODEX_HOME/skills/{skill-name}`；如果 `CODEX_HOME` 未设置，默认是 `~/.codex/skills/{skill-name}`。
 4. 如果当前权限模式不允许直接写入 Codex skill 目录，按 Codex App 的权限流程请求用户授权。
 5. 安装完成后，提示用户重启 Codex 以加载新 skill。
-
-## Codex App 升级 SOP
-
-1. 优先使用 Codex 官方 `$skill-installer` 或等价官方 skill 管理能力重新安装同一个 repo/path/ref。
-2. 如果官方安装器检测到目标 skill 已存在并拒绝覆盖，向用户说明当前是升级场景，并请求用户确认是否覆盖已安装的 `{skill-name}`。
-3. 用户确认前，不要删除或覆盖 `$CODEX_HOME/skills/{skill-name}` 或 `~/.codex/skills/{skill-name}`。
-4. 升级完成后，确认目标目录下存在 `SKILL.md`，并提示用户重启 Codex。

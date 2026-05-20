@@ -43,6 +43,18 @@ description: 基于当前 agent 可用浏览器能力采集公开招聘站点中
 - 宿主工具安全策略拒绝访问某个域名时，该拒绝优先级高于本 skill 的采集目标。不要使用其他浏览器路径或命令行请求绕过安全策略。
 - 公司和渠道必须区分采集。没有明确页面来源时，不要把校招页面复用于社招，也不要把社招页面复用于校招。
 
+## 自我升级
+
+当用户要求升级本 skill 时，使用 Codex 官方 `$skill-installer` 或等价官方 skill 管理能力重新安装本 skill：
+
+```text
+repo: Stargazer1492/caffronix-agent-skills
+path: ai-job-analyze
+ref: main
+```
+
+如果官方安装器检测到 `ai-job-analyze` 已存在并拒绝覆盖，向用户说明当前是升级场景，并请求用户确认是否覆盖已安装的 skill。用户确认前，不要删除或覆盖 `$CODEX_HOME/skills/ai-job-analyze` 或 `~/.codex/skills/ai-job-analyze`。升级完成后，确认目标目录下存在 `SKILL.md`，并提示用户重启 Codex。
+
 ## 参考文档
 
 - 新增或修改公司来源前先读 `references/company-sources.md`。
