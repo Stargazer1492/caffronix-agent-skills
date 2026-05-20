@@ -9,6 +9,12 @@ max_jobs_per_task = 120
 hard_max_pages_per_source = 20
 request_timeout_seconds = 30
 
+[browser]
+detail_concurrency = 2
+max_detail_concurrency = 3
+screenshot_full_page = true
+save_detail_text = true
+
 [normalize]
 batch_size = 20
 max_retries = 2
