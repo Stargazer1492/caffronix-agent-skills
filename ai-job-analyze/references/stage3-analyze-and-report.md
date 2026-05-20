@@ -13,6 +13,7 @@
 - NACE 的 [career readiness competencies](https://www.naceweb.org/career-readiness/competencies/career-readiness-defined/)：用职业发展、沟通、批判性思维、技术、专业性、协作、领导力等通用能力作为求职侧解释框架，但不要机械套标签。
 - USF Career Services 的 [STAR method](https://myusf.usfca.edu/career-services/career-resources/interviews-offers/interviews/star-method)：行动建议要能落到候选人如何组织项目证据，即 situation、task、action、result，而不是只说“提升能力”。
 - [Carbon dashboards](https://carbondesignsystem.com/data-visualization/dashboards/)、[USWDS data visualizations](https://designsystem.digital.gov/components/data-visualizations/)、[Atlassian data visualization color](https://atlassian.design/foundations/color-new/data-visualization-color/) 和 [WCAG 2.2](https://www.w3.org/TR/WCAG22/)：报告要有清晰层级、克制配色、常见图表、可访问文本、足够对比度和可读密度。
+- OpenAI 的 [GPT Image 2 model page](https://developers.openai.com/api/docs/models/gpt-image-2) 和 [image generation guide](https://platform.openai.com/docs/guides/image-generation)：图片版报告可以通过 Codex 内置 `$imagegen` 或 API/CLI 方式调用 GPT Image 模型生成；当文字和布局必须完全可控时，使用程序化 HTML 渲染截图。
 
 ## 分析方法
 
@@ -151,9 +152,38 @@
 1. 只有用户要求图片、分享图或配置启用图片导出时生成。
 2. 先生成或复用 `report.json` 和 `report.html`。
 3. 从报告中抽取最关键的 3 条发现、1 个核心图和 3 条行动建议。
-4. 生成固定画布的图片版 `report.png`，默认竖版长图；如果用户指定横版、封面图或平台比例，按用户比例执行。
+4. 按图片生成优先级选择路径，生成 `report.png`。
 5. 图片必须保留来源、样本量、生成时间和限制说明。
 6. 图片信息必须少于 HTML，不得把完整报告压缩成密集海报。
+
+### 图片生成优先级
+
+1. `$imagegen`：默认优先。适合生成更有设计感的一页式摘要海报、封面图、视觉化信息图。使用时必须输入 `report.json` 摘要、精确文字、样本数字、画布比例和限制说明。生成后必须检查中文、数字、样本范围和结论是否准确；如果文字不稳定，降级到后续路径。
+2. API/CLI 直接调用 `gpt-image-2`：当用户明确要求 API、批量、模型控制、成本路径、日志或可复现参数时使用。此路径需要 `OPENAI_API_KEY`，优先使用已安装 `$imagegen` skill 的 `scripts/image_gen.py` CLI，不要临时编写一次性 SDK runner。调用前确认模型、尺寸、质量、输出路径和网络权限。
+3. 程序化 HTML 截图：当前两条 AI 图片路径不可用、中文文字必须完全稳定、或版式/图表需要像素级可控时使用。不要用 Python 直接手绘 PNG；使用 `report.json -> Python 生成固定画布 HTML -> Playwright 渲染截图 -> report.png`。
+
+### 程序化图片流程
+
+使用程序化路径时，按以下链路执行：
+
+1. Python 读取 `reports/{run_id}/report.json`，抽取 `headline`、关键发现、行动建议、能力分布、样本数字和限制说明。
+2. Python 生成图片专用 HTML：`reports/{run_id}/report-image.html`。
+3. `report-image.html` 使用固定画布，默认 `1440x2200`。CSS 内联，不依赖远程资源。
+4. 内容必须压缩为一页式摘要海报：1 个结论、3 个关键信号、1 个能力图、3 条求职建议、样本说明。
+5. Python 先做内容约束：中文字符默认不超过 450；如果视觉拥挤，继续压缩到 300 字以内。
+6. 布局优先保证不裁切：顶部放标题和结论，中段放关键发现和能力图，底部放行动建议、样本范围和限制说明。指标卡优先横向排列，避免底部被裁切。
+7. 启动本地 HTTP server，用 Playwright 打开 `report-image.html`。
+8. 设置 viewport 为 `1440x2200`，使用 `page.screenshot(...)` 输出 `reports/{run_id}/report.png`。
+9. 用 `sips` 或等价工具校验图片尺寸；用 `view_image` 预览，检查裁切、文字溢出、图表可读性和视觉完整性。
+10. 如果发现裁切、字数过密、底部元素缺失或中文不可读，先改 HTML/CSS 和文案，再重新截图。
+
+核心模式：
+
+```text
+report.json -> Python 生成固定画布 HTML -> Playwright 渲染截图 -> report.png
+```
+
+这种方式比 Python 直接用 PIL 画图更适合信息图，因为 HTML/CSS 更容易控制中文排版、卡片、图表、间距和视觉层级。
 
 ### 图片设计规范
 
@@ -169,7 +199,7 @@
 ### 图片生成提示词
 
 ```text
-你是一个高级信息图设计师。基于 report.json 生成 report.png。
+你是一个高级信息图设计师。基于 report.json 生成一张精美、克制、适合手机阅读的一页式摘要海报。
 
 输入：
 - report.json：{report_json}
@@ -183,6 +213,7 @@
 4. 所有数字、结论和建议必须来自 report.json。
 5. 保留样本量、公司/渠道、生成时间和限制说明。
 6. 使用清晰视觉层级、稳定配色和大字号；避免低对比、小字、装饰性干扰。
+7. 中文和数字必须逐字准确；如果无法保证文字准确，应改用程序化 HTML 截图路径。
 ```
 
 ## 自检清单
