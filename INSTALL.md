@@ -1,8 +1,8 @@
-# Skill 安装指引
+# Codex App Skill 安装指引
 
-本文件给本地 agent 使用。用户通常只需要把 README 中的一句话安装 prompt 发给 agent。
+本文件给 Codex App 中的本地 agent 使用。v1 只考虑 Codex App，安装和升级 skill 时必须优先使用 Codex 官方 `$skill-installer`，不要默认用本仓库脚本自行复制到 Codex 的 skill 目录。
 
-## 仓库下载
+## 仓库来源
 
 所有 skill 都从同一个仓库下载：
 
@@ -10,7 +10,7 @@
 https://github.com/Stargazer1492/caffronix-agent-skills/archive/refs/heads/main.zip
 ```
 
-安装时先下载并解压这个 zip，然后复制其中对应 skill 名字的目录。
+Codex 官方 `$skill-installer` 支持 GitHub repo/path 时，优先直接使用仓库地址和 skill 源目录，不必手写下载、解压和复制流程。
 
 ## Skill 索引
 
@@ -18,46 +18,39 @@ https://github.com/Stargazer1492/caffronix-agent-skills/archive/refs/heads/main.
 |---|---|---|
 | `ai-job-analyze` | `ai-job-analyze/` | 按当前 agent 能力优先使用 Browser、browser-use 或 Computer Use 抓取公开招聘页并分析 AI 岗位；脚本 crawler 仅作为 fallback。 |
 
-## 安装目标目录
+## 安装原则
 
-优先安装到当前宿主支持的原生 skills 目录：
+1. 使用 Codex 官方 `$skill-installer` 或等价官方 skill 安装能力安装或升级。
+2. 不要手工复制 skill 到 Codex 的 skill 目录。
+3. 安装目录由 Codex 官方安装器决定。
+4. 写入 Codex 用户级 skill 目录通常会触发权限控制；按 Codex App 的权限流程请求用户授权，不要绕过权限策略。
 
-| 宿主 | 推荐安装目录 |
-|---|---|
-| Codex | `~/.agents/skills/{skill-name}` |
-| Claude Code | `~/.claude/skills/{skill-name}` |
-| OpenClaw | `<OpenClaw active workspace>/skills/{skill-name}` |
-| Hermes | `~/.hermes/skills/{skill-name}` |
+## Codex App 安装 SOP
 
-如果无法判断宿主，安装到当前项目级目录：
+1. 确认用户要安装的 `{skill-name}` 在上方 Skill 索引中存在。
+2. 使用 Codex 官方 `$skill-installer` 从 GitHub 仓库安装指定目录：
 
-```text
-<当前项目>/.agents/skills/{skill-name}
-```
+   ```text
+   repo: Stargazer1492/caffronix-agent-skills
+   path: {skill-name}
+   ref: main
+   ```
 
-安装前必须确认目标 skills 根目录可写。做法是先创建目标根目录，再写入并删除一个临时探测文件：
+   对 `ai-job-analyze`，安装目标参数应为：
 
-```text
-<目标 skills 根目录>/.write-test
-```
+   ```text
+   repo: Stargazer1492/caffronix-agent-skills
+   path: ai-job-analyze
+   ref: main
+   ```
 
-如果不可写，不要继续安装到该目录；先提醒用户：
+3. 不要手工指定或硬编码安装目录。Codex 官方安装器会安装到 `$CODEX_HOME/skills/{skill-name}`；如果 `CODEX_HOME` 未设置，默认是 `~/.codex/skills/{skill-name}`。
+4. 如果当前权限模式不允许直接写入 Codex skill 目录，按 Codex App 的权限流程请求用户授权。
+5. 安装完成后，提示用户重启 Codex 以加载新 skill。
 
-```text
-本 skill 会输出文件，默认会写入 skill 所在工作目录。你可以提供一个本 agent 可写入的路径，或者修改工作目录的写入权限。
-```
+## Codex App 升级 SOP
 
-用户提供可写路径后，再安装到该路径下的项目级目录；如果用户选择修改权限，则重新探测目标目录写权限。
-
-## 安装步骤
-
-1. 下载并解压仓库 zip。
-2. 根据用户要求的 `{skill-name}` 找到同名目录。
-3. 判断当前宿主的目标 skills 根目录，并确认该目录可写。
-4. 将整个 `{skill-name}` 目录复制到目标 skills 目录。
-5. 确认目标目录下存在 `SKILL.md`。
-6. 如果该 skill 包含 `scripts/bootstrap.py`，用当前宿主可写 workspace 初始化：
-
-```bash
-python scripts/bootstrap.py init-workspace --workspace-root <宿主可写workspace>
-```
+1. 优先使用 Codex 官方 `$skill-installer` 或等价官方 skill 管理能力重新安装同一个 repo/path/ref。
+2. 如果官方安装器检测到目标 skill 已存在并拒绝覆盖，向用户说明当前是升级场景，并请求用户确认是否覆盖已安装的 `{skill-name}`。
+3. 用户确认前，不要删除或覆盖 `$CODEX_HOME/skills/{skill-name}` 或 `~/.codex/skills/{skill-name}`。
+4. 升级完成后，确认目标目录下存在 `SKILL.md`，并提示用户重启 Codex。
