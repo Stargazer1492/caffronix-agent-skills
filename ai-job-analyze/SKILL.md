@@ -1,53 +1,53 @@
 ---
 name: ai-job-analyze
-description: 基于当前 agent 可用浏览器能力采集公开招聘站点中的人工智能岗位，分析校招或社招机会，并生成本地优先的洞察产物。优先使用 Playwright 或 Codex App 内置 Browser，再按需降级到 browser-use、Computer Use 或 Chrome plugin 浏览公开页面并抽取页面可见数据。适用于用户要求收集人工智能岗位、比较校招/社招渠道、或基于公开招聘页生成岗位市场分析的场景。
+description: Collect AI job postings from public recruiting sites using the browser capabilities available to the current agent, analyze campus or experienced-hire opportunities, and generate local-first insight artifacts. Prefer Playwright or the Codex App built-in Browser, then fall back as needed to browser-use, Computer Use, or the Chrome plugin to browse public pages and extract visible page data. Use when the user asks to collect AI jobs, compare campus and experienced-hire channels, or generate job-market analysis from public recruiting pages.
 ---
 
-# 人工智能岗位分析
+# AI Job Analysis
 
-本技能用于本地优先的人工智能岗位市场分析。它的核心能力是指导当前 agent 选择合适的浏览器操作方式，访问公开招聘页面，抽取页面可见的岗位列表和详情页内容，再完成字段归一、洞察整理和本地产物保存。
+This skill supports local-first AI job-market analysis. Its core purpose is to guide the current agent in choosing the right browser operation path, visiting public recruiting pages, extracting visible job-list and detail-page content, then normalizing fields, organizing insights, and saving local artifacts.
 
-## 能力路由
+## Capability Routing
 
-执行采集前，先检查当前宿主可用的 tools、plugins 和 skills，再按以下顺序选择路径。不要只根据操作系统决定路径；路由选择以当前会话实际可用能力为准。
+Before collecting data, first check the tools, plugins, and skills available in the current host, then choose a path in the order below. Do not choose a path based only on the operating system; routing must be based on the capabilities actually available in the current session.
 
-1. Playwright 可用时，优先使用 Playwright 访问公开招聘页面。它适合列表页和详情页的可复现采集、独立 tab、有限并发、截图和结构化文本提取。
-2. Codex App 内置 Browser 可用时，使用内置 Browser 打开公开招聘页面，搜索关键词、翻页、读取页面或 DOM 中的岗位信息。它是 Codex App 官方浏览器能力，但当前会话中是否暴露要以实际 tools、plugins 和 skills 为准。
-3. Playwright 和内置 Browser 都不可用，但 `browser-use` 可用时，使用 `browser-use` 的默认浏览器访问公开页面。它是可独立运行的浏览器自动化路径，但作为降级路径使用；不要连接用户真实 Chrome profile，除非用户明确要求。
-4. 页面只能通过真实可视 UI 操作时，且 Computer Use 可用，才使用 Computer Use 进行点击、输入、滚动和截图识别。Computer Use 依赖单一可视 UI 状态，不适合作为并发采集路径。
-5. Chrome plugin 只作为 Computer Use 不可用、或用户明确要求使用真实 Chrome 环境时的最后浏览器 fallback。默认不要使用用户真实 Chrome profile、cookie、登录态或本地浏览器数据来扩大抓取范围。
-6. 如果任一浏览器工具返回宿主安全策略拒绝，例如 `Browser Use rejected this action due to browser security policy`、`The user has requested that ... should not be used`、禁止通过 workaround、CDP、alternate browser surface 或 indirect execution 达成同一结果，则该来源必须立即停止。不要再尝试其他浏览器、Computer Use、命令行 HTTP 请求或其他自动化路径访问同一域名。
-7. 所有浏览器路径都不可用或失败时，只生成失败摘要和原因，不伪造岗位数据。
+1. When Playwright is available, prefer Playwright for visiting public recruiting pages. It is suitable for reproducible collection from list and detail pages, independent tabs, limited concurrency, screenshots, and structured text extraction.
+2. When the Codex App built-in Browser is available, use it to open public recruiting pages, search keywords, paginate, and read job information from the page or DOM. It is the official Codex App browser capability, but whether it is exposed in the current session depends on the actual tools, plugins, and skills available.
+3. When neither Playwright nor the built-in Browser is available but `browser-use` is available, use the default `browser-use` browser to visit public pages. This is an independently runnable browser automation path, but it should be treated as a fallback. Do not connect to the user's real Chrome profile unless the user explicitly asks for it.
+4. Use Computer Use for clicking, typing, scrolling, and screenshot-based recognition only when the page can be operated only through a real visible UI and Computer Use is available. Computer Use depends on a single visible UI state and is not suitable as a concurrent collection path.
+5. Use the Chrome plugin only as the final browser fallback when Computer Use is unavailable or when the user explicitly asks to use a real Chrome environment. By default, do not use the user's real Chrome profile, cookies, logged-in state, or local browser data to expand the collection scope.
+6. If any browser tool returns a host security-policy rejection, such as `Browser Use rejected this action due to browser security policy`, `The user has requested that ... should not be used`, or a prohibition against achieving the same result through a workaround, CDP, an alternate browser surface, or indirect execution, stop that source immediately. Do not try other browsers, Computer Use, command-line HTTP requests, or other automation paths to access the same domain.
+7. If all browser paths are unavailable or fail, generate only a failure summary and reasons. Do not fabricate job data.
 
-不论使用哪条浏览器路径，最终产物都必须遵守 `references/output-contract.md`，写入同一套 `crawl_plan.json`、`crawl_result.json`、`jobs_index.jsonl`、`failures.jsonl`、`details/`、`normalized_jobs.jsonl` 和报告文件。
+Whichever browser path is used, final artifacts must follow `references/output-contract.md` and write the same set of files: `crawl_plan.json`, `crawl_result.json`, `jobs_index.jsonl`, `failures.jsonl`, `details/`, `normalized_jobs.jsonl`, and report files.
 
-## 工作流程
+## Workflow
 
-1. 采集前先收集用户意图。用户没有给出时，使用以下默认范围：
-   - 公司：`bytedance`、`alibaba`、`tencent`、`meituan`
-   - 渠道：校招、社招或两者
-   - 查询词：例如 `人工智能产品经理`、`智能体`、`大模型应用`、`算法`
-   - 分析问题：洞察需要优先回答的具体问题
+1. Before collecting data, first gather the user's intent. If the user does not provide it, use the following default scope:
+   - Companies: `bytedance`, `alibaba`, `tencent`, `meituan`
+   - Channels: campus recruiting, experienced-hire recruiting, or both
+   - Search terms: for example `AI product manager`, `agent`, `large-model application`, `algorithm`
+   - Analysis questions: the concrete questions the insights should prioritize answering
 
-2. 如果用户只给出跨公司分析需求，没有明确公司、渠道或来源，先按 `references/stage1-collection.md` 拆解任务，生成本次采集计划，并控制每轮采集规模，避免把多个公司、多个渠道和大量详情页塞进一个长任务。
+2. If the user gives only a cross-company analysis request without specifying companies, channels, or sources, first break down the task according to `references/stage1-collection.md`, generate the collection plan for this run, and control each collection batch size. Avoid packing multiple companies, multiple channels, and a large number of detail pages into one long task.
 
-3. 按阶段执行，不把采集、字段归一和洞察整理塞进一个长任务：
-   - 采集阶段：按“能力路由”使用浏览器能力，并按 `references/stage1-collection.md` 搜索、翻页、进入详情页、截图、提取正文和保存本地产物。
-   - 归一化阶段：Codex App 读取采集产物，按 `references/stage2-normalization.md` 分批完成字段归一。
-   - 分析与报告阶段：Codex App 按 `references/stage3-analyze-and-report.md` 根据归一后的岗位和用户问题生成 `report.json` 与报告。
+3. Execute in stages. Do not pack collection, field normalization, and insight organization into one long task:
+   - Collection stage: use browser capabilities according to "Capability Routing", and follow `references/stage1-collection.md` to search, paginate, open detail pages, take screenshots, extract body text, and save local artifacts.
+   - Normalization stage: have Codex App read the collection artifacts and normalize fields in batches according to `references/stage2-normalization.md`.
+   - Analysis and reporting stage: have Codex App generate `report.json` and the report from normalized jobs and the user's questions according to `references/stage3-analyze-and-report.md`.
 
-## 运行规则
+## Runtime Rules
 
-- 运行产物只能写入宿主传入的可写工作目录下的 `caffronix-agent-skills/ai-job-analyze/`。不要写入 skill 安装目录、用户 home 目录或未验证可写的任意路径。
-- 不读取 `.env`、Cookie、本地存储、浏览器配置文件、令牌、密码或验证码。
-- 如果招聘站点出现登录、验证码、账号风险验证或权限弹窗，停止操作并报告被阻断的来源。
-- 使用浏览器能力时，只访问公开页面和公开接口；不要使用用户个人浏览器 profile、cookie、登录态或账号权限来扩大抓取范围。
-- 宿主工具安全策略拒绝访问某个域名时，该拒绝优先级高于本 skill 的采集目标。不要使用其他浏览器路径或命令行请求绕过安全策略。
-- 公司和渠道必须区分采集。没有明确页面来源时，不要把校招页面复用于社招，也不要把社招页面复用于校招。
+- Runtime artifacts may be written only to `caffronix-agent-skills/ai-job-analyze/` under the writable working directory provided by the host. Do not write to the skill installation directory, the user's home directory, or any arbitrary path whose writability has not been verified.
+- Do not read `.env`, cookies, local storage, browser profiles, tokens, passwords, or verification codes.
+- If a recruiting site shows a login, CAPTCHA, account risk check, or permission popup, stop operating and report the blocked source.
+- When using browser capabilities, access only public pages and public APIs. Do not use the user's personal browser profile, cookies, logged-in state, or account permissions to expand the collection scope.
+- When a host tool security policy rejects access to a domain, that rejection takes precedence over this skill's collection goal. Do not use other browser paths or command-line requests to bypass the security policy.
+- Companies and channels must be collected separately. Without an explicit page source, do not reuse a campus recruiting page for experienced-hire recruiting, and do not reuse an experienced-hire page for campus recruiting.
 
-## 自我升级
+## Self-Upgrade
 
-当用户要求升级本 skill 时，使用 Codex 官方 `$skill-installer` 或等价官方 skill 管理能力重新安装本 skill：
+When the user asks to upgrade this skill, use the official Codex `$skill-installer` or an equivalent official skill management capability to reinstall this skill:
 
 ```text
 repo: Stargazer1492/caffronix-agent-skills
@@ -55,12 +55,12 @@ path: ai-job-analyze
 ref: main
 ```
 
-如果官方安装器检测到 `ai-job-analyze` 已存在并拒绝覆盖，向用户说明当前是升级场景，并请求用户确认是否覆盖已安装的 skill。用户确认前，不要删除或覆盖 `$CODEX_HOME/skills/ai-job-analyze` 或 `~/.codex/skills/ai-job-analyze`。升级完成后，确认目标目录下存在 `SKILL.md`，并提示用户重启 Codex。
+If the official installer detects that `ai-job-analyze` already exists and refuses to overwrite it, explain to the user that this is an upgrade scenario and ask the user to confirm whether to overwrite the installed skill. Before the user confirms, do not delete or overwrite `$CODEX_HOME/skills/ai-job-analyze` or `~/.codex/skills/ai-job-analyze`. After the upgrade is complete, confirm that `SKILL.md` exists in the target directory and tell the user to restart Codex.
 
-## 参考文档
+## References
 
-- 新增或修改公司来源前先读 `references/company-sources.md`。
-- 修改采集计划、浏览器采集、详情页截图、详情页正文提取或分页流程前先读 `references/stage1-collection.md`。
-- 修改字段归一流程前先读 `references/stage2-normalization.md`。
-- 修改分析方法或报告结构前先读 `references/stage3-analyze-and-report.md`。
-- 修改输出字段或产物类型前先读 `references/output-contract.md`。
+- Read `references/company-sources.md` before adding or modifying company sources.
+- Read `references/stage1-collection.md` before changing the collection plan, browser collection, detail-page screenshots, detail-page body extraction, or pagination flow.
+- Read `references/stage2-normalization.md` before changing the field normalization flow.
+- Read `references/stage3-analyze-and-report.md` before changing the analysis method or report structure.
+- Read `references/output-contract.md` before changing output fields or artifact types.

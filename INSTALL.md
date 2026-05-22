@@ -17,6 +17,7 @@ Codex 官方 `$skill-installer` 支持 GitHub repo/path 时，优先直接使用
 | skill 名称 | 源目录 | 说明 |
 |---|---|---|
 | `ai-job-analyze` | `ai-job-analyze/` | 按当前 agent 能力优先使用 Playwright 或 Browser 抓取公开招聘页并分析 AI 岗位，再按需降级到 browser-use、Computer Use 或 Chrome plugin。 |
+| `deepseek-task` | `deepseek-task/` | 使用 OpenAI TypeScript SDK 调用 DeepSeek 执行明确任务；API key 通过本地 setup 页面或环境变量配置，不要求用户把 key 粘贴到对话中。 |
 
 ## 安装原则
 
@@ -41,6 +42,14 @@ Codex 官方 `$skill-installer` 支持 GitHub repo/path 时，优先直接使用
    ```text
    repo: Stargazer1492/caffronix-agent-skills
    path: ai-job-analyze
+   ref: main
+   ```
+
+   对 `deepseek-task`，安装目标参数应为：
+
+   ```text
+   repo: Stargazer1492/caffronix-agent-skills
+   path: deepseek-task
    ref: main
    ```
 

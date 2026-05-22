@@ -1,0 +1,20 @@
+{
+  "name": "deepseek-task",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup": "tsx scripts/setup-deepseek-key.ts",
+    "deepseek": "tsx scripts/run-deepseek.ts",
+    "doctor": "tsx scripts/doctor.ts",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "openai": "^6.39.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3"
+  }
+}

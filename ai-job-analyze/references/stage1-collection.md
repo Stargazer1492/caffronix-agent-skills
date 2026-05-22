@@ -65,6 +65,53 @@
 4. Computer Use：视觉 UI 兜底。仅在必须通过可视界面操作时使用，并发度固定为 1。
 5. Chrome plugin：最后 fallback。仅当 Computer Use 不可用，或用户明确要求真实 Chrome 环境时使用；默认不要读取或依赖用户 Chrome profile、cookie、登录态或本地浏览器数据。
 
+## Playwright 可用性检查与安装兜底
+
+Playwright 是采集阶段的优先路径，但不能假设用户环境已经安装。执行采集前先做可用性检查，再决定是否安装或降级。
+
+### 检查顺序
+
+1. 检查当前会话是否已有 Playwright skill、`playwright-cli`、项目内 Playwright 依赖，或可用的 `npx playwright`。
+2. 如果已有可用 Playwright，优先使用该路径，不重复安装。
+3. 如果 Playwright 未安装，但当前环境允许安装依赖，可以尝试安装。
+4. 如果安装或运行失败，最多进行 3 次修复尝试。第 3 次仍失败时，放弃 Playwright 路径，继续尝试内置 Browser、`browser-use`、Computer Use 或 Chrome plugin。
+
+### 安装与修复策略
+
+优先使用最小安装，避免扩大环境影响：
+
+```bash
+npm i -D playwright
+npx playwright install chromium
+```
+
+如果已有 `package.json` 或项目使用 `pnpm`、`npm`、`yarn`，优先沿用项目包管理器。没有明确项目依赖时，优先使用临时工具或当前宿主已提供的 Playwright 能力，不要为了采集任务重构项目依赖。
+
+常见修复尝试按以下顺序计数，每执行一次算 1 次：
+
+1. 补装浏览器二进制：`npx playwright install chromium`。
+2. 补装浏览器系统依赖：`npx playwright install --with-deps chromium`，仅在当前系统和权限允许时执行。
+3. 清理错误配置或改用当前可用浏览器通道，例如只使用 Chromium、降低并发度到 1、改成无头/有头模式中当前环境可运行的一种。
+
+3 次修复失败后必须停止 Playwright 路径，并在 `failures.jsonl` 或 `crawl_result.json` 中记录：
+
+```json
+{
+  "阶段": "Playwright 可用性检查",
+  "原因": "Playwright 安装或启动失败，已达到 3 次修复上限",
+  "fallback_to_next_browser_tool": true
+}
+```
+
+不要因为 Playwright 安装失败而终止整个采集任务；除非所有浏览器路径都失败，否则继续尝试下一种采集工具。
+
+### 边界
+
+- Playwright 安装失败不是岗位来源失败，只是采集工具失败。
+- Playwright 路径中的宿主安全策略拒绝仍然是硬停止；不要用安装、换浏览器或命令行请求绕过同一域名的宿主安全策略。
+- 不要读取或复用用户浏览器 profile、cookie、localStorage、sessionStorage、token 或账号权限来修复 Playwright。
+- 如果安装需要网络、系统包或权限，而当前宿主不允许，记录失败并降级，不要卡住任务。
+
 ## 输入
 
 - 用户指定的公司、渠道和岗位关键词。

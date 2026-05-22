@@ -13,6 +13,7 @@
 ## 技能列表
 
 - `ai-job-analyze`：抓取并分析字节、阿里、腾讯、美团公开招聘站点中的 AI 岗位，生成 HTML 或 PNG 报告。
+- `deepseek-task`：通过 OpenAI TypeScript SDK 调用 DeepSeek 执行摘要、分析、改写、代码审查等明确任务，并提供本地浏览器 API key 配置流程。
 
 ## 安装说明
 
