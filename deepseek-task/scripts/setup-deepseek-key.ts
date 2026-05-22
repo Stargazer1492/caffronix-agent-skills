@@ -10,6 +10,7 @@ import {
   MODEL_OPTIONS,
   THINKING_OPTIONS,
   type DeepSeekSettings,
+  readDeepSeekConfig,
   readDeepSeekSettings,
   saveDeepSeekConfig,
   saveDeepSeekSettings,
@@ -21,8 +22,9 @@ const HEARTBEAT_INTERVAL_MS = 2_000;
 const HEARTBEAT_GRACE_MS = 10_000;
 const LOGO_FILE = new URL("../assets/logo.png", import.meta.url);
 
-function parseArgs(argv: string[]): { timeoutMinutes?: number } {
+function parseArgs(argv: string[]): { timeoutMinutes?: number; resetKey: boolean } {
   let timeoutMinutes: number | undefined;
+  let resetKey = false;
 
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
@@ -45,16 +47,19 @@ function parseArgs(argv: string[]): { timeoutMinutes?: number } {
         }
         index += 1;
         break;
+      case "--reset-key":
+        resetKey = true;
+        break;
       case "--help":
       case "-h":
-        console.log("Usage: npm run setup -- [--timeout-minutes 10]");
+        console.log("Usage: npm run setup -- [--timeout-minutes 10] [--reset-key]");
         process.exit(0);
       default:
         throw new Error(`Unknown option: ${arg}`);
     }
   }
 
-  return { timeoutMinutes };
+  return { timeoutMinutes, resetKey };
 }
 
 function escapeHtml(value: string): string {
@@ -65,9 +70,20 @@ function escapeHtml(value: string): string {
     .replaceAll("\"", "&quot;");
 }
 
-function pageHtml(token: string, settings: DeepSeekSettings, message = ""): string {
+function pageHtml(
+  token: string,
+  settings: DeepSeekSettings,
+  options: { canEditApiKey: boolean; hasExistingKey: boolean },
+  message = "",
+): string {
   const escapedMessage = escapeHtml(message);
   const escapedToken = escapeHtml(token);
+  const apiKeyRequired = options.canEditApiKey;
+  const apiKeyDisabled = !options.canEditApiKey;
+  const apiKeyValue = apiKeyDisabled && options.hasExistingKey ? "********" : "";
+  const apiKeyCopy = options.canEditApiKey
+    ? "保存到本机 secret 文件，仅用于调用 DeepSeek。"
+    : "已保存。当前只修改默认运行配置，不会覆盖 API Key。";
   const modelOptionsHtml = MODEL_OPTIONS.map((model) => {
     const selected = model === settings.model ? " selected" : "";
     return `<option value="${escapeHtml(model)}"${selected}>${escapeHtml(model)}</option>`;
@@ -299,6 +315,7 @@ function pageHtml(token: string, settings: DeepSeekSettings, message = ""): stri
   </style>
   <script>
     const setupToken = ${JSON.stringify(token)};
+    const apiKeyRequired = ${JSON.stringify(apiKeyRequired)};
     let formSubmitting = false;
 
     function notifyCancel() {
@@ -331,7 +348,7 @@ function pageHtml(token: string, settings: DeepSeekSettings, message = ""): stri
       });
 
       form?.addEventListener("submit", (event) => {
-        if (!apiKeyInput?.value.trim()) {
+        if (apiKeyRequired && !apiKeyInput?.value.trim()) {
           event.preventDefault();
           showApiKeyRequired();
           apiKeyInput?.focus();
@@ -369,9 +386,9 @@ function pageHtml(token: string, settings: DeepSeekSettings, message = ""): stri
         <input type="hidden" name="token" value="${escapedToken}">
         <div class="config-list">
           <label class="config-item" for="apiKey">
-            <span class="field-title">API Key<span class="field-copy">保存到本机 secret 文件，仅用于调用 DeepSeek。</span></span>
+            <span class="field-title">API Key<span class="field-copy">${escapeHtml(apiKeyCopy)}</span></span>
             <span>
-              <input id="apiKey" name="apiKey" type="password" required autofocus autocomplete="off" spellcheck="false" placeholder="粘贴 sk-..." aria-describedby="apiKeyError">
+              <input id="apiKey" name="apiKey" type="password"${apiKeyRequired ? " required autofocus" : " disabled"} autocomplete="off" spellcheck="false" placeholder="粘贴 sk-..." value="${escapeHtml(apiKeyValue)}" aria-describedby="apiKeyError">
               <span id="apiKeyError" class="field-error" role="alert">请填写 API Key</span>
             </span>
           </label>
@@ -415,15 +432,19 @@ function pageHtml(token: string, settings: DeepSeekSettings, message = ""): stri
 </html>`;
 }
 
-function successHtml(token: string): string {
+function successHtml(token: string, options: { keySaved: boolean }): string {
   const escapedToken = escapeHtml(token);
+  const title = options.keySaved ? "DeepSeek API Key 已保存" : "DeepSeek 配置已保存";
+  const body = options.keySaved
+    ? "本地 setup server 将自动停止。此页面会尝试自动关闭；如果浏览器阻止自动关闭，请直接关闭此标签页并返回 Codex。"
+    : "默认运行配置已保存，API Key 未被修改。本地 setup server 将自动停止。此页面会尝试自动关闭；如果浏览器阻止自动关闭，请直接关闭此标签页并返回 Codex。";
 
   return `<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DeepSeek API Key 已保存</title>
+  <title>${escapeHtml(title)}</title>
   <style>
     :root {
       color-scheme: dark;
@@ -477,8 +498,8 @@ function successHtml(token: string): string {
 <body>
   <main>
     <img class="brand" src="/assets/logo.png?token=${escapedToken}" alt="Caffronix logo">
-    <h1>DeepSeek API Key 已保存</h1>
-    <p>本地 setup server 将自动停止。此页面会尝试自动关闭；如果浏览器阻止自动关闭，请直接关闭此标签页并返回 Codex。</p>
+    <h1>${escapeHtml(title)}</h1>
+    <p>${escapeHtml(body)}</p>
   </main>
 </body>
 </html>`;
@@ -552,6 +573,9 @@ async function main(): Promise<void> {
   let pageActive = false;
   let lastHeartbeatAt = Date.now();
   const args = parseArgs(process.argv.slice(2));
+  const config = await readDeepSeekConfig();
+  const hasExistingKey = Boolean(config.apiKey);
+  const canEditApiKey = args.resetKey || !hasExistingKey;
   const settings = await readDeepSeekSettings();
   const timeoutMinutes = args.timeoutMinutes ?? DEFAULT_SETUP_TIMEOUT_MINUTES;
   const timeoutMs = timeoutMinutes * 60_000;
@@ -582,7 +606,7 @@ async function main(): Promise<void> {
       if (request.method === "GET" && parsedUrl.pathname === "/") {
         pageActive = true;
         lastHeartbeatAt = Date.now();
-        sendHtml(response, 200, pageHtml(token, settings));
+        sendHtml(response, 200, pageHtml(token, settings, { canEditApiKey, hasExistingKey }));
         return;
       }
 
@@ -623,11 +647,13 @@ async function main(): Promise<void> {
           return;
         }
 
-        await saveDeepSeekConfig(apiKey);
+        if (canEditApiKey) {
+          await saveDeepSeekConfig(apiKey);
+        }
         await saveDeepSeekSettings({ model, thinking, temperature, maxTokens });
         saved = true;
-        sendHtml(response, 200, successHtml(token));
-        console.log(setupResult(true, "deepseek_key_saved"));
+        sendHtml(response, 200, successHtml(token, { keySaved: canEditApiKey }));
+        console.log(setupResult(true, canEditApiKey ? "deepseek_key_saved" : "deepseek_settings_saved"));
         setTimeout(() => server.close(), 1800);
         return;
       }
@@ -636,7 +662,7 @@ async function main(): Promise<void> {
       response.end("Not found");
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      sendHtml(response, 400, pageHtml(token, settings, message));
+      sendHtml(response, 400, pageHtml(token, settings, { canEditApiKey, hasExistingKey }, message));
     }
   });
 

@@ -65,5 +65,5 @@ Codex 官方 `$skill-installer` 支持 GitHub repo/path 时，优先直接使用
    npm run doctor
    ```
 
-   `npm run setup` 会打印 `DEEPSEEK_SETUP_URL=...`。用 Codex App 内置 Browser 打开该 URL，让用户在本地页面填写 API Key 和默认运行配置。不要让用户把 API Key 粘贴到聊天窗口，不要读取或打印 `~/.config/caffronix-agent-skills/deepseek.env`。如果用户关闭页面或超过 setup 等待时间，停止初始化并提示用户重新安装或重新运行初始化时需要在限定时间内完成。
+   `npm run setup` 会打印 `DEEPSEEK_SETUP_URL=...`。用 Codex App 内置 Browser 打开该 URL，让用户在本地页面填写 API Key 和默认运行配置。不要让用户把 API Key 粘贴到聊天窗口，不要读取或打印 `~/.config/caffronix-agent-skills/deepseek.env`。如果本机已经配置过 API Key，setup 页面默认只允许修改非敏感运行配置，API Key 输入框置灰并显示为 `********`，保存时不得覆盖 `deepseek.env`。只有用户明确要求重置、替换、更新或重新输入 API Key 时，才使用 `npm run setup -- --reset-key` 打开允许覆盖 key 的页面。如果用户关闭页面或超过 setup 等待时间，停止初始化并提示用户重新安装或重新运行初始化时需要在限定时间内完成。
 6. 安装完成并完成该 skill 所需的安装后初始化后，提示用户重启 Codex 以加载新 skill。

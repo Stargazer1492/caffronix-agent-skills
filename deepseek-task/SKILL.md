@@ -41,7 +41,15 @@ Start the local setup server:
 npm run setup
 ```
 
-The setup page lets the user enter the API key and configure non-sensitive DeepSeek defaults. If the user deletes a value or submits an invalid setting, the scripts fall back to built-in defaults:
+The setup page lets the user enter the API key and configure non-sensitive DeepSeek defaults. If a key is already configured, the same setup page opens in settings-only mode by default: the API Key input is disabled, shows only `********`, and saving the form must not overwrite `deepseek.env`.
+
+If the user explicitly asks to reset, replace, update, or re-enter the DeepSeek API key, start setup with:
+
+```bash
+npm run setup -- --reset-key
+```
+
+If the user deletes a value or submits an invalid setting, the scripts fall back to built-in defaults:
 
 - `model`: `deepseek-v4-flash`
 - `thinking`: `enabled`
@@ -80,7 +88,7 @@ When Codex opens the setup URL in the built-in Browser, record the setup tab id 
 
 The setup page is shown in Chinese and includes the bundled `assets/logo.png` brand image. It uses a centered logo, a compact configuration list for API key and model, and a separate guidance section. The guidance section tells the user to open `https://platform.deepseek.com/api_keys`, click "创建 API key", copy the key immediately, and remember that once the key window is closed, the same key cannot be viewed again and must be recreated.
 
-On success, the script prints a machine-readable result and exits `0`:
+On success, the script prints a machine-readable result and exits `0`. Saving a new key prints `deepseek_key_saved`; saving settings without changing the key prints `deepseek_settings_saved`:
 
 ```text
 DEEPSEEK_SETUP_RESULT={"ok":true,"event":"deepseek_key_saved","configFile":"..."}
@@ -101,6 +109,8 @@ globalThis.browser = await agent.browsers.get("iab");
 const visibility = await browser.capabilities.get("visibility");
 await visibility.set(false);
 ```
+
+If the user asks to change saved defaults at any time, open the same setup page in the Codex in-app Browser with `npm run setup`. Do not pass `--reset-key` for ordinary settings changes. After the user saves, close the setup tab and hide the Browser panel the same way as post-install setup. If the user asks to reset the API key, use `npm run setup -- --reset-key` instead.
 
 If the skill is already installed but has not been initialized, or if a DeepSeek run fails because no key is configured, run the same setup flow as a fallback. This fallback does not change the rule that fresh installs should initialize immediately after installation.
 
