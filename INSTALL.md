@@ -55,4 +55,15 @@ Codex 官方 `$skill-installer` 支持 GitHub repo/path 时，优先直接使用
 
 3. 不要手工指定或硬编码安装目录。Codex 官方安装器会安装到 `$CODEX_HOME/skills/{skill-name}`；如果 `CODEX_HOME` 未设置，默认是 `~/.codex/skills/{skill-name}`。
 4. 如果当前权限模式不允许直接写入 Codex skill 目录，按 Codex App 的权限流程请求用户授权。
-5. 安装完成后，提示用户重启 Codex 以加载新 skill。
+5. 对 `deepseek-task`，安装完成后立即执行安装后初始化；不要等到首次使用时才触发：
+
+   ```bash
+   skill_dir="${CODEX_HOME:-$HOME/.codex}/skills/deepseek-task"
+   cd "$skill_dir"
+   npm install
+   npm run setup
+   npm run doctor
+   ```
+
+   `npm run setup` 会打印 `DEEPSEEK_SETUP_URL=...`。用 Codex App 内置 Browser 打开该 URL，让用户在本地页面填写 API Key 和默认运行配置。不要让用户把 API Key 粘贴到聊天窗口，不要读取或打印 `~/.config/caffronix-agent-skills/deepseek.env`。如果用户关闭页面或超过 setup 等待时间，停止初始化并提示用户重新安装或重新运行初始化时需要在限定时间内完成。
+6. 安装完成并完成该 skill 所需的安装后初始化后，提示用户重启 Codex 以加载新 skill。

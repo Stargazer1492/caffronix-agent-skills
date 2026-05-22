@@ -19,21 +19,29 @@ This skill lets Codex delegate a bounded task to DeepSeek through a local TypeSc
 - The local setup page may be opened in Codex Browser, but after opening the URL, let the user type the key manually. Do not inspect the password field after user input.
 - After a successful setup result, close the Codex Browser setup tab if it is still open, hide the Codex in-app Browser panel, then run the smoke test.
 
-## First-Run Setup
+## Post-Install Setup
 
-From this skill directory, install dependencies if needed:
+This skill should be initialized immediately after installation or upgrade. Do not wait until the first DeepSeek task unless the user explicitly asks to skip initialization.
+
+After the official installer finishes, run setup from the installed skill directory, not from the source repository:
+
+```bash
+cd "${CODEX_HOME:-$HOME/.codex}/skills/deepseek-task"
+```
+
+Install dependencies if needed:
 
 ```bash
 npm install
 ```
 
-If `DEEPSEEK_API_KEY` is not already available, start the local setup server:
+Start the local setup server:
 
 ```bash
 npm run setup
 ```
 
-The setup page lets the user configure non-sensitive DeepSeek defaults. If the user deletes a value or submits an invalid setting, the scripts fall back to built-in defaults:
+The setup page lets the user enter the API key and configure non-sensitive DeepSeek defaults. If the user deletes a value or submits an invalid setting, the scripts fall back to built-in defaults:
 
 - `model`: `deepseek-v4-flash`
 - `thinking`: `enabled`
@@ -93,6 +101,8 @@ globalThis.browser = await agent.browsers.get("iab");
 const visibility = await browser.capabilities.get("visibility");
 await visibility.set(false);
 ```
+
+If the skill is already installed but has not been initialized, or if a DeepSeek run fails because no key is configured, run the same setup flow as a fallback. This fallback does not change the rule that fresh installs should initialize immediately after installation.
 
 ## Running DeepSeek
 
@@ -173,4 +183,4 @@ Skill upgrades must not read, delete, overwrite, truncate, or migrate local Deep
 ~/.config/caffronix-agent-skills/deepseek.settings.json
 ```
 
-After installation or upgrade, confirm that `SKILL.md` exists in the target skill directory and tell the user to restart Codex so the new skill is loaded.
+After installation or upgrade, confirm that `SKILL.md` exists in the target skill directory, then run the post-install setup flow from that installed directory. When setup and `npm run doctor` succeed, tell the user to restart Codex so the new skill is loaded. If the user explicitly asks to skip initialization, say that the skill is installed but not initialized and that the next use must run the setup flow before calling DeepSeek.
