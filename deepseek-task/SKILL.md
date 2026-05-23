@@ -1,108 +1,108 @@
 ---
 name: deepseek-task
-description: Use DeepSeek from Codex through the OpenAI TypeScript SDK for summarization, analysis, drafting, code review, or other delegated LLM tasks. Trigger when the user asks Codex to call DeepSeek, compare a result with DeepSeek, run a task through DeepSeek, or use a DeepSeek model while keeping the API key out of the chat transcript.
+description: 通过 OpenAI TypeScript SDK 在 Codex 中调用 DeepSeek，完成摘要、分析、起草、代码审查或其他边界清晰的委托任务。用户要求 Codex 调用 DeepSeek、对比 DeepSeek 结果、让 DeepSeek 执行某个任务，或要求在不把 API key 写入聊天记录的前提下使用 DeepSeek 模型时触发。
 ---
 
-# DeepSeek Task
+# DeepSeek 任务
 
-This skill lets Codex delegate a bounded task to DeepSeek through a local TypeScript runner. It uses the official `openai` npm package with `baseURL: "https://api.deepseek.com"`.
+这个 skill 让 Codex 通过本地 TypeScript runner 把边界清晰的任务委托给 DeepSeek。runner 使用官方 `openai` npm 包，并设置 `baseURL: "https://api.deepseek.com"`。
 
-## Safety Rules
+## 安全规则
 
-- Never ask the user to paste `DEEPSEEK_API_KEY` into chat.
-- Never print, summarize, inspect, or log the API key.
-- Prefer `process.env.DEEPSEEK_API_KEY` when it is already set.
-- If no key is configured, run the local setup script and have the user enter the key in the browser page.
-- The local `deepseek.env` file is for `DEEPSEEK_API_KEY` only. Do not store model names, timeouts, or other runtime options in that file.
-- Non-sensitive defaults from the setup page are stored separately in `~/.config/caffronix-agent-skills/deepseek.settings.json`.
-- Do not write secrets into this repository, the skill install directory, shell history, prompts, reports, or generated artifacts.
-- The local setup page may be opened in Codex Browser, but after opening the URL, let the user type the key manually. Do not inspect the password field after user input.
-- After a successful setup result, close the Codex Browser setup tab if it is still open, hide the Codex in-app Browser panel, then run the smoke test.
+- 永远不要要求用户把 `DEEPSEEK_API_KEY` 粘贴到聊天里。
+- 永远不要打印、总结、检查或记录 API key。
+- 如果环境中已经设置 `process.env.DEEPSEEK_API_KEY`，优先使用它。
+- 如果没有配置 key，运行本地 setup 脚本，让用户在浏览器页面里手动输入。
+- 本地 `deepseek.env` 文件只用于保存 `DEEPSEEK_API_KEY`。不要把模型名、超时时间或其他运行参数写入该文件。
+- 非敏感默认值由 setup 页面单独保存到 `~/.config/caffronix-agent-skills/deepseek.settings.json`。
+- 不要把 secrets 写入本仓库、skill 安装目录、shell history、prompt、报告或生成产物。
+- 可以用 Codex Browser 打开本地 setup 页面，但打开 URL 后必须让用户手动输入 key。用户输入后，不要检查 password 字段。
+- setup 成功后，如果 Codex Browser setup tab 仍然打开，先关闭该 tab，隐藏 Codex 内置 Browser 面板，再运行 smoke test。
 
-## Post-Install Setup
+## 安装后初始化
 
-This skill should be initialized immediately after installation or upgrade. Do not wait until the first DeepSeek task unless the user explicitly asks to skip initialization.
+安装或升级后应立即初始化本 skill。除非用户明确要求跳过初始化，否则不要等到第一次 DeepSeek 任务时才配置。
 
-After the official installer finishes, run setup from the installed skill directory, not from the source repository:
+官方安装器完成后，从已安装的 skill 目录运行 setup，不要从源码仓库运行：
 
 ```bash
 cd "${CODEX_HOME:-$HOME/.codex}/skills/deepseek-task"
 ```
 
-Install dependencies if needed:
+如有需要，安装依赖：
 
 ```bash
 npm install
 ```
 
-Start the local setup server:
+启动本地 setup server：
 
 ```bash
 npm run setup
 ```
 
-The setup page lets the user enter the API key and configure non-sensitive DeepSeek defaults. If a key is already configured, the same setup page opens in settings-only mode by default: the API Key input is disabled, shows only `********`, and saving the form must not overwrite `deepseek.env`.
+setup 页面允许用户输入 API key，并配置非敏感 DeepSeek 默认值。如果 key 已经存在，同一个 setup 页面默认以 settings-only 模式打开：API Key 输入框禁用，只显示 `********`，保存表单时不得覆盖 `deepseek.env`。
 
-If the user explicitly asks to reset, replace, update, or re-enter the DeepSeek API key, start setup with:
+如果用户明确要求重置、替换、更新或重新输入 DeepSeek API key，使用：
 
 ```bash
 npm run setup -- --reset-key
 ```
 
-If the user deletes a value or submits an invalid setting, the scripts fall back to built-in defaults:
+如果用户删除某个值或提交无效配置，脚本会回退到内置默认值：
 
 - `model`: `deepseek-v4-flash`
 - `thinking`: `enabled`
 - `temperature`: `0.2`
 - `maxTokens`: `10240`
 
-If the user explicitly asks to use another timeout for this run, pass it as a command argument. Command arguments always have higher priority than setup-page defaults:
+如果用户明确要求本次 setup 使用其他超时时间，通过命令参数传入。命令参数优先级高于 setup 页面保存的默认值：
 
 ```bash
 npm run setup -- --timeout-minutes 5
 ```
 
-The script asks the OS for an available local port, so port conflicts are handled automatically. It prints a machine-readable setup URL:
+脚本会向操作系统申请可用本地端口，因此端口冲突会自动处理。脚本会打印机器可读的 setup URL：
 
 ```text
 DEEPSEEK_SETUP_URL=http://127.0.0.1:<port>/?token=<one-time-token>
 ```
 
-Open that URL with the Codex App Browser if available; otherwise ask the user to open it in their browser. The page saves the key to:
+如果 Codex App Browser 可用，用它打开该 URL；否则让用户在自己的浏览器中打开。页面会把 key 保存到：
 
 ```text
 ~/.config/caffronix-agent-skills/deepseek.env
 ```
 
-The setup page saves non-sensitive defaults to:
+setup 页面会把非敏感默认值保存到：
 
 ```text
 ~/.config/caffronix-agent-skills/deepseek.settings.json
 ```
 
-Both files are written with owner-only permissions where the platform supports it. The setup server defaults to a ten-minute wait. If the user does not submit the key in time, the script exits non-zero and Codex should tell the user to run setup again and complete the browser form within the allowed time. If the process is still running after the allowed time because of host behavior, Codex may kill the setup process and report the timeout.
+在平台支持的情况下，两个文件都会以仅 owner 可读写的权限写入。setup server 默认等待 10 分钟。如果用户没有在时限内提交 key，脚本会非零退出，Codex 应告诉用户重新运行 setup，并在允许时间内完成浏览器表单。如果因为宿主行为导致进程超时后仍在运行，Codex 可以终止 setup 进程并报告超时。
 
-The setup page sends a local cancel signal when the browser page is closed before saving. It also sends a short heartbeat while the page is open; if the heartbeat stops before a key is saved, the setup server exits non-zero with a browser-closed or browser-disconnected result. Treat that as a canceled setup, not a credential failure.
+浏览器页面在保存前被关闭时，setup 页面会发送本地取消信号。页面打开期间也会发送短 heartbeat；如果 key 保存前 heartbeat 停止，setup server 会以浏览器关闭或断开连接结果非零退出。把这种情况视为用户取消 setup，而不是凭证失败。
 
-When Codex opens the setup URL in the built-in Browser, record the setup tab id and monitor that tab while the setup process is waiting. If the tab disappears before `DEEPSEEK_SETUP_RESULT` reports success, kill the setup process and tell the user the setup was canceled because the browser page was closed. This Codex-side tab check is the reliable fallback when browser close events or beacon delivery are blocked by the host.
+当 Codex 用内置 Browser 打开 setup URL 时，记录 setup tab id，并在 setup 进程等待期间监控该 tab。如果 `DEEPSEEK_SETUP_RESULT` 成功前 tab 消失，终止 setup 进程，并告诉用户 setup 因浏览器页面被关闭而取消。这个 Codex 侧 tab 检查是浏览器 close event 或 beacon 被宿主拦截时的可靠兜底。
 
-The setup page is shown in Chinese and includes the bundled `assets/logo.png` brand image. It uses a centered logo, a compact configuration list for API key and model, and a separate guidance section. The guidance section tells the user to open `https://platform.deepseek.com/api_keys`, click "创建 API key", copy the key immediately, and remember that once the key window is closed, the same key cannot be viewed again and must be recreated.
+setup 页面使用中文展示，并包含内置 `assets/logo.png` 品牌图。页面使用居中 logo、紧凑的 API key 和模型配置列表，以及独立的指引区。指引区提示用户打开 `https://platform.deepseek.com/api_keys`，点击“创建 API key”，立即复制 key，并记住 key 窗口关闭后无法再次查看同一 key，只能重新创建。
 
-On success, the script prints a machine-readable result and exits `0`. Saving a new key prints `deepseek_key_saved`; saving settings without changing the key prints `deepseek_settings_saved`:
+成功时，脚本打印机器可读结果并以 `0` 退出。保存新 key 时输出 `deepseek_key_saved`；只保存 settings 且不修改 key 时输出 `deepseek_settings_saved`：
 
 ```text
 DEEPSEEK_SETUP_RESULT={"ok":true,"event":"deepseek_key_saved","configFile":"..."}
 ```
 
-After a successful setup, immediately run a smoke test:
+setup 成功后，立即运行 smoke test：
 
 ```bash
 npm run doctor
 ```
 
-If Codex opened the setup page in the built-in Browser, close that tab before running `npm run doctor`. The success page also attempts to close itself automatically, but Codex should not rely on browser self-close behavior alone.
+如果 Codex 用内置 Browser 打开 setup 页面，运行 `npm run doctor` 前先关闭 setup tab。成功页也会尝试自动关闭自己，但 Codex 不应只依赖页面自关闭行为。
 
-After closing the setup tab, also hide the in-app Browser panel itself. Navigating the tab to `about:blank` is not enough. Use the Browser visibility capability and call `set(false)` on it. The proven path is:
+关闭 setup tab 后，还要隐藏 in-app Browser 面板本身。把 tab 导航到 `about:blank` 不够。使用 Browser visibility capability，并对它调用 `set(false)`。已验证路径如下：
 
 ```js
 globalThis.browser = await agent.browsers.get("iab");
@@ -110,75 +110,81 @@ const visibility = await browser.capabilities.get("visibility");
 await visibility.set(false);
 ```
 
-If the user asks to change saved defaults at any time, open the same setup page in the Codex in-app Browser with `npm run setup`. Do not pass `--reset-key` for ordinary settings changes. After the user saves, close the setup tab and hide the Browser panel the same way as post-install setup. If the user asks to reset the API key, use `npm run setup -- --reset-key` instead.
+如果用户随时要求修改已保存的默认值，用 `npm run setup` 在 Codex in-app Browser 打开同一个 setup 页面。普通设置变更不要传 `--reset-key`。用户保存后，同样关闭 setup tab 并隐藏 Browser 面板。如果用户要求重置 API key，改用 `npm run setup -- --reset-key`。
 
-If the skill is already installed but has not been initialized, or if a DeepSeek run fails because no key is configured, run the same setup flow as a fallback. This fallback does not change the rule that fresh installs should initialize immediately after installation.
+如果 skill 已安装但尚未初始化，或 DeepSeek 调用因为没有 key 而失败，执行同一 setup 流程作为兜底。这个兜底不改变“新安装后应立即初始化”的规则。
 
-## Running DeepSeek
+## 运行 DeepSeek
 
-Use `npm run deepseek --` followed by a prompt, or pass input through stdin:
+使用 `npm run deepseek --` 加 prompt，或通过 stdin 传入输入：
 
 ```bash
-npm run deepseek -- --prompt "Summarize this in three bullets."
+npm run deepseek -- --prompt "用三条 bullet 总结这段内容。"
 ```
 
 ```bash
-cat notes.md | npm run deepseek -- --system "You are a concise analyst."
+cat notes.md | npm run deepseek -- --system "你是一个简洁的分析师。"
 ```
 
-For larger prompts, write the prompt into a temporary local file and use:
+较大的 prompt 先写入临时本地文件，再使用：
 
 ```bash
 npm run deepseek -- --prompt-file /absolute/path/to/prompt.md
 ```
 
-Useful options:
+常用选项：
 
-- `--model <name>` overrides the default model.
-- `--thinking <enabled|disabled>` overrides the default thinking mode.
-- `--system <text>` or `--system-file <path>` adds a system message.
-- `--temperature <number>` sets sampling temperature.
-- `--max-tokens <number>` sets `max_tokens`.
-- `--display <browser|command>` controls how results are presented. Default: `browser`.
-- `--json` prints the response as JSON with metadata in command mode.
+- `--model <name>` 覆盖默认模型。
+- `--thinking <enabled|disabled>` 覆盖默认 thinking 模式。
+- `--system <text>` 或 `--system-file <path>` 增加 system message。
+- `--temperature <number>` 设置采样温度。
+- `--max-tokens <number>` 设置 `max_tokens`。
+- `--display <browser|command>` 控制结果展示方式，默认是 `browser`。
+- `--json` 在 command 模式下以 JSON 打印响应和元数据。
 
-Runtime option resolution:
+运行参数解析优先级：
 
-1. Command arguments such as `--model`, `--thinking`, `--temperature`, and `--max-tokens`
-2. Values saved in `deepseek.settings.json`
-3. Built-in defaults: `deepseek-v4-flash`, `enabled`, `0.2`, and `10240`
+1. 命令参数，例如 `--model`、`--thinking`、`--temperature`、`--max-tokens`
+2. `deepseek.settings.json` 中保存的值
+3. 内置默认值：`deepseek-v4-flash`、`enabled`、`0.2`、`10240`
 
-Use `deepseek-v4-flash` by default. The setup page currently offers `deepseek-v4-flash` and `deepseek-v4-pro`. If the user asks for higher quality, stronger reasoning, or explicitly asks to use the Pro model for a single run, pass `--model deepseek-v4-pro` on that command. Do not persist the model choice in `deepseek.env`.
+默认使用 `deepseek-v4-flash`。setup 页面当前提供 `deepseek-v4-flash` 和 `deepseek-v4-pro`。如果用户要求更高质量、更强推理，或明确要求本次使用 Pro 模型，在该命令中传 `--model deepseek-v4-pro`。不要把模型选择持久化到 `deepseek.env`。
 
-DeepSeek thinking mode is sent as `thinking: { "type": "enabled" }` or `thinking: { "type": "disabled" }` in the chat completion request body. DeepSeek documents that `temperature` is ignored when thinking mode is enabled; still pass the configured `temperature` value so the non-thinking path and saved settings remain consistent.
+DeepSeek thinking mode 会在 chat completion 请求体中以 `thinking: { "type": "enabled" }` 或 `thinking: { "type": "disabled" }` 发送。DeepSeek 文档说明 thinking mode 启用时会忽略 `temperature`；仍然传入配置的 `temperature`，以保持非 thinking 路径和已保存 settings 的一致性。
 
-Default result mode is `browser`: after DeepSeek returns, the runner prints a machine-readable `DEEPSEEK_RESULT=...` line for Codex and starts a detached temporary local result page server. Open `DEEPSEEK_RESULT_URL` in the Codex in-app Browser so the user can see DeepSeek output directly. After opening the result URL, Codex may finish the task and should not wait for the result server process.
+默认结果模式是 `browser`：DeepSeek 返回后，runner 会为 Codex 打印机器可读的 `DEEPSEEK_RESULT=...` 行，并启动一个 detached 临时本地结果页 server。打开 `DEEPSEEK_RESULT_URL` 到 Codex in-app Browser，让用户直接查看 DeepSeek 输出。打开结果 URL 后，Codex 可以结束任务，不需要等待结果页 server 进程。
 
-The result server listens only on `127.0.0.1` and uses the fixed port range `14920` through `14925`. Before starting a new result server, the runner scans that port range and shuts down any previous `deepseek-task` result server it finds. The result page has a top title bar with `assets/logo.png`, the title "DeepSeek Result", and the current DeepSeek request parameters. It displays `reasoningContent` as `思考内容` and `content` as `回复内容`, rendering both as Markdown. The local result server exits when the result page posts `/close`, when the user clicks the top-right `X` button, or automatically after ten minutes. The page also attempts `window.close()` after `/close`, but Codex should not rely on web content alone to hide the in-app Browser panel.
+结果 server 只监听 `127.0.0.1`，固定端口范围为 `14920` 到 `14925`。启动新结果 server 前，runner 会扫描这个端口范围，并关闭发现的旧 `deepseek-task` 结果 server。结果页顶部标题栏包含 `assets/logo.png`、标题 `DeepSeek Result` 和当前 DeepSeek 请求参数。页面把 `reasoningContent` 显示为 `思考内容`，把 `content` 显示为 `回复内容`，两者都按 Markdown 渲染。结果页向 `/close` 发请求、用户点击右上角 `X` 按钮，或 10 分钟自动到期时，本地结果 server 退出。页面也会在 `/close` 后尝试 `window.close()`，但 Codex 不应只依赖网页自己隐藏 in-app Browser 面板。
 
-If the user asks for command mode, no-browser mode, or asks Codex to answer from the result, pass:
+如果用户要求 command 模式、no-browser 模式，或要求 Codex 直接从结果中回答，传：
 
 ```bash
 npm run deepseek -- --display command --prompt "..."
 ```
 
-In command mode, the runner exits immediately after writing stdout. With `--json`, stdout includes `reasoningContent` and `content` separately. Without `--json`, stdout prints only final `content`.
+command 模式下，runner 写完 stdout 后立即退出。加 `--json` 时，stdout 分别包含 `reasoningContent` 和 `content`。不加 `--json` 时，stdout 只打印最终 `content`。
 
-## Health Check
+## 健康检查
 
-Use `npm run doctor` after setup or when diagnosing configuration. It reads the configured key without printing it, sends a minimal request to DeepSeek using the saved non-secret settings, and prints JSON status. Pass `--model deepseek-v4-pro` only when the user asks to test the Pro model. A successful result looks like:
+setup 后或诊断配置时，使用：
+
+```bash
+npm run doctor
+```
+
+它会读取已配置 key 但不打印 key，使用已保存的非敏感 settings 向 DeepSeek 发送最小请求，并打印 JSON 状态。只有用户要求测试 Pro 模型时，才传 `--model deepseek-v4-pro`。成功结果示例：
 
 ```json
 {"ok":true,"provider":"deepseek","model":"deepseek-v4-flash","content":"deepseek-ok"}
 ```
 
-## Task Boundary
+## 任务边界
 
-Use DeepSeek for a specific subtask with a concrete prompt. Do not forward unrelated workspace files, secrets, environment dumps, browser cookies, local configs, or private credentials. When using source files as input, include only the minimum excerpts needed for the task.
+只把具体、边界清晰的子任务交给 DeepSeek。不要转发无关工作区文件、secrets、环境 dump、浏览器 cookie、本地配置或私密凭证。使用源码文件作为输入时，只包含完成任务所需的最小片段。
 
-## Self-Upgrade
+## 自升级
 
-When the user asks to install or upgrade this skill, use the Codex official `$skill-installer` or an equivalent official skill management capability to reinstall this skill:
+用户要求安装或升级本 skill 时，使用 Codex 官方 `$skill-installer` 或等价的官方技能管理能力重新安装：
 
 ```text
 repo: Stargazer1492/caffronix-agent-skills
@@ -186,13 +192,13 @@ path: deepseek-task
 ref: main
 ```
 
-If the official installer detects that `deepseek-task` already exists and refuses to overwrite it, explain to the user that this is an upgrade scenario and ask the user to confirm whether to overwrite the installed skill. Before the user confirms, do not delete or overwrite `$CODEX_HOME/skills/deepseek-task` or `~/.codex/skills/deepseek-task`.
+如果官方安装器检测到 `deepseek-task` 已存在并拒绝覆盖，说明这是升级场景，请向用户解释并确认是否覆盖已安装 skill。用户确认前，不要删除或覆盖 `$CODEX_HOME/skills/deepseek-task` 或 `~/.codex/skills/deepseek-task`。
 
-Skill upgrades must not read, delete, overwrite, truncate, or migrate local DeepSeek configuration files unless the user explicitly asks for a config reset:
+除非用户明确要求重置配置，否则 skill 升级不得读取、删除、覆盖、截断或迁移本地 DeepSeek 配置文件：
 
 ```text
 ~/.config/caffronix-agent-skills/deepseek.env
 ~/.config/caffronix-agent-skills/deepseek.settings.json
 ```
 
-After installation or upgrade, confirm that `SKILL.md` exists in the target skill directory, then run the post-install setup flow from that installed directory. When setup and `npm run doctor` succeed, tell the user to restart Codex so the new skill is loaded. If the user explicitly asks to skip initialization, say that the skill is installed but not initialized and that the next use must run the setup flow before calling DeepSeek.
+安装或升级后，确认目标 skill 目录中存在 `SKILL.md`，再从已安装目录执行安装后初始化流程。setup 和 `npm run doctor` 都成功后，提示用户重启 Codex，让新 skill 生效。如果用户明确要求跳过初始化，说明 skill 已安装但尚未初始化，下一次使用前必须先执行 setup 流程。

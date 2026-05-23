@@ -1,4 +1,4 @@
-# 公司来源约定
+# 公司来源契约
 
 ## 支持范围
 
@@ -23,7 +23,7 @@ v1 渠道：
 - 采集阶段负责发现公开岗位详情页和保留原始字段，不负责最终人工智能岗位语义判断。
 - 人工智能岗位判断放在分析层，避免某家公司筛选参数变化导致口径漂移。
 - 来源契约不只需要入口 URL，还必须说明查询词如何传入、页码如何推进、停止条件如何判断。
-- 用户提供 source URL 时可以覆盖默认 URL，但不能跳过分页、详情页采集和失败记录。
+- 用户提供来源 URL 时可以覆盖默认 URL，但不能跳过分页、详情页采集和失败记录。
 - 面向用户暴露的是单次任务总量上限，不暴露每页抓取数量，也不要求用户理解公司或来源级预算。
 - 单页数量、页面内部批大小、接口 `limit` 等属于来源内部细节。可以用这些细节提高效率，但不能把它们作为用户必须理解的配置。
 
@@ -119,21 +119,21 @@ https://careers.tencent.com/search.html?index={page}&keyword={query}
 https://careers.tencent.com/search.html?keyword={query}&query=at_2,at_3
 ```
 
-腾讯校招分页参数需要在 adapter 实现时进一步确认。不能只依赖首屏 URL。
+腾讯校招分页参数需要在适配器实现时进一步确认。不能只依赖首屏 URL。
 
 ### 阿里社招
 
 - 入口：`https://talent-holding.alibaba.com/off-campus/position-list`
 - 分页模式：特殊适配。
 
-社招 URL 中没有暴露关键词和分页参数。实现 adapter 时必须通过浏览器观察前端请求、路由状态或接口载荷，确认以下内容：
+社招 URL 中没有暴露关键词和分页参数。实现适配器时必须通过浏览器观察前端请求、路由状态或接口载荷，确认以下内容：
 
 - 查询关键词如何提交。
 - 页码或 cursor 如何推进。
 - 是否存在接口级分页参数。
 - 详情页 URL 如何构造。
 
-在确认前，阿里社招 adapter 不得假设可以通过 URL query string 翻页。
+在确认前，阿里社招适配器不得假设可以通过 URL query string 翻页。
 
 ### 阿里实习生
 
@@ -153,7 +153,7 @@ https://campus-talent.alibaba.com/campus/position?batchId=100000540002&circleCod
 https://talent-holding.alibaba.com/campus/position-list?campusType=freshman&lang=zh&batchId=100000060001
 ```
 
-阿里实习生和应届生都属于校招大类，但应在 adapter 内用 `sub_channel` 区分。
+阿里实习生和应届生都属于校招大类，但应在适配器内用 `sub_channel` 区分。
 
 ## 最小字段
 
