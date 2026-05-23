@@ -152,7 +152,9 @@ Use `deepseek-v4-flash` by default. The setup page currently offers `deepseek-v4
 
 DeepSeek thinking mode is sent as `thinking: { "type": "enabled" }` or `thinking: { "type": "disabled" }` in the chat completion request body. DeepSeek documents that `temperature` is ignored when thinking mode is enabled; still pass the configured `temperature` value so the non-thinking path and saved settings remain consistent.
 
-Default result mode is `browser`: after DeepSeek returns, the runner prints a machine-readable `DEEPSEEK_RESULT=...` line for Codex and starts a temporary local result page. Open `DEEPSEEK_RESULT_URL` in the Codex in-app Browser so the user can see DeepSeek output directly. The result page displays both `reasoningContent` and `content` when DeepSeek returns both. The local result server exits when the result page posts `/close` or after its timeout.
+Default result mode is `browser`: after DeepSeek returns, the runner prints a machine-readable `DEEPSEEK_RESULT=...` line for Codex and starts a detached temporary local result page server. Open `DEEPSEEK_RESULT_URL` in the Codex in-app Browser so the user can see DeepSeek output directly. After opening the result URL, Codex may finish the task and should not wait for the result server process.
+
+The result server listens only on `127.0.0.1` and uses the fixed port range `14920` through `14925`. Before starting a new result server, the runner scans that port range and shuts down any previous `deepseek-task` result server it finds. The result page has a top title bar with `assets/logo.png`, the title "DeepSeek Result", and the current DeepSeek request parameters. It displays `reasoningContent` as `思考内容` and `content` as `回复内容`, rendering both as Markdown. The local result server exits when the result page posts `/close`, when the user clicks the top-right `X` button, or automatically after ten minutes. The page also attempts `window.close()` after `/close`, but Codex should not rely on web content alone to hide the in-app Browser panel.
 
 If the user asks for command mode, no-browser mode, or asks Codex to answer from the result, pass:
 
