@@ -1,6 +1,6 @@
 ---
 name: use-web-agent
-description: Use Chrome to operate web AI agents such as ChatGPT on chatgpt.com, DeepSeek on chat.deepseek.com, and Grok inside x.com, then return the completed answer from visual screenshots. Use when the user asks Codex to run a prompt through a web agent, compare or test browser-based AI agents, use ChatGPT, DeepSeek, or Grok through the user's logged-in browser session, capture an agent reply visually, or explicitly invokes use-web-agent.
+description: 使用Chrome操作ChatGPT、DeepSeek、Grok等网页版AI Agent，并通过视觉截图返回完整回复。适用于用户要求Codex在已登录的浏览器会话中调用ChatGPT、DeepSeek或Grok，运行某个提示词、对比或测试网页版AI Agent、截取Agent回复，或显式调用use-web-agent。
 ---
 
 # Use Web Agent
