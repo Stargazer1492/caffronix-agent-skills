@@ -1,140 +1,140 @@
 ---
 name: use-web-agent
-description: 使用Chrome操作ChatGPT、DeepSeek、Grok等网页版AI Agent，并通过视觉截图返回完整回复。适用于用户要求Codex在已登录的浏览器会话中调用ChatGPT、DeepSeek或Grok，运行某个提示词、对比或测试网页版AI Agent、截取Agent回复，或显式调用use-web-agent。
+description: 使用Chrome操作ChatGPT、DeepSeek、Grok等网页版智能体，并通过视觉截图返回完整回复。适用于用户要求Codex在已登录的浏览器会话中调用ChatGPT、DeepSeek或Grok，运行某个提示词、对比或测试网页版智能体、截取智能体回复，或显式调用use-web-agent。
 ---
 
-# Use Web Agent
+# 使用网页版智能体
 
-## Overview
+## 概览
 
-Operate browser-based AI agents through the user's Chrome session, wait for the answer to finish, capture the result with screenshots, and return the visible answer.
+通过用户已经登录的Chrome会话操作网页中的AI智能体，等待回答完成，用截图记录结果，并返回屏幕上可见的内容。
 
-This skill supports multiple web agents. First identify the intended agent, then run that agent's workflow. Use screenshots as the primary source of truth for navigation, waiting, result capture, and final reporting.
+本技能支持多个网页版智能体。先根据用户表述确定目标智能体，再执行对应流程。导航、等待、结果截取和最终回复都以截图为主要依据。
 
-## Hard Rules
+## 硬性规则
 
-- Use the Chrome plugin and its `control-chrome` workflow. If the Node REPL `js` tool is not already available, use tool discovery for the Node REPL tool as instructed by the Chrome skill.
-- Prefer the user's existing logged-in Chrome session. Reuse an already-open target page when the visible page and task context match.
-- Operate through visual browser actions: screenshots, visible tab selection, coordinate clicks, typing, keypresses, visible menus, and scrolling.
-- Do not use reverse engineering or non-visual extraction. Avoid private APIs, network inspection, page source, DOM snapshots, DOM locators, JavaScript evaluation, CSS selectors, XPath, clipboard reads, local storage, cookies, session stores, or internal endpoints.
-- Do not use web search or another browser backend to replace the requested web agent. The result must come from the selected agent's visible web UI.
-- Do not read private browser data. Only observe what is visible in the active Chrome tab.
-- If login, CAPTCHA, account restrictions, rate limits, subscription prompts, or other user-only actions block progress, stop and ask the user to complete the visible blocker in Chrome.
+- 使用Chrome插件及其`control-chrome`流程。如果Node REPL的`js`工具尚未可用，按Chrome技能说明通过工具发现加载Node REPL工具。
+- 优先使用用户现有的已登录Chrome会话。已经打开的目标页面与当前任务匹配时，直接复用。
+- 只通过可视化浏览器动作操作页面，包括截图、选择可见标签页、坐标点击、输入、按键、可见菜单和滚动。
+- 不使用逆向工程或非视觉提取方式。不要调用私有接口、检查网络请求、读取页面源码、抓取DOM快照、使用DOM定位器、执行JavaScript、使用CSS选择器、XPath、剪贴板读取、本地存储、Cookie、会话存储或内部接口。
+- 不用网页搜索或其他浏览器后端替代用户指定的网页版智能体。结果必须来自所选智能体的可见网页界面。
+- 不读取浏览器中的私人数据。只观察当前Chrome标签页里可见的内容。
+- 如果登录、验证码、账号限制、频率限制、订阅提示或其他必须由用户处理的页面阻塞流程，停止操作，并请用户在Chrome中完成当前可见阻塞项。
 
-## Agent Selection
+## 智能体选择
 
-Choose the agent from the user's wording:
+根据用户表述选择目标智能体：
 
-- Use ChatGPT when the user says ChatGPT, OpenAI web agent, chatgpt.com, GPT, `PRO`, Thinking model selection, or asks to use the default web agent without naming Grok.
-- Use DeepSeek when the user says DeepSeek, deepseek, chat.deepseek.com, 专家模式, 深度思考, or asks to use the DeepSeek web agent.
-- Use Grok when the user says Grok, X Grok, x.com, Twitter/X agent, or asks to use the migrated `grok-in-x` behavior.
-- If the user asks for multiple agents, run them one at a time and keep separate screenshots and result summaries for each agent.
-- If the requested agent is ambiguous and the task would affect a live account or spend paid quota, ask a short clarification. Otherwise default to ChatGPT.
+- 用户提到ChatGPT、OpenAI网页版智能体、chatgpt.com、GPT、`PRO`、Thinking模型选择，或要求使用默认网页版智能体且没有指定Grok时，使用ChatGPT。
+- 用户提到DeepSeek、deepseek、chat.deepseek.com、专家模式、深度思考，或要求使用DeepSeek网页版智能体时，使用DeepSeek。
+- 用户提到Grok、X Grok、x.com、Twitter/X智能体，或要求使用迁移后的`grok-in-x`行为时，使用Grok。
+- 用户要求多个智能体时，逐个运行，并分别保留截图和结果摘要。
+- 如果目标智能体不明确，且任务会影响真实账号或消耗付费额度，先提出一个简短澄清问题。其他情况下默认使用ChatGPT。
 
-## Shared Result Capture
+## 结果截取
 
-- Wait until the answer is complete before reporting.
-- Take screenshots during waiting and after completion.
-- If the answer is longer than one viewport, scroll upward and downward to capture every hidden portion. Use overlapping screenshots so no lines are missed.
-- Return the answer based on screenshots. Include screenshot paths or rendered screenshots when available.
-- If text is too small, blurred, or partially hidden, adjust zoom or viewport through visible browser controls, then capture again.
-- If any portion cannot be read confidently from screenshots, state the limitation and ask whether to continue with another screenshot pass.
+- 等回答完成后再报告结果。
+- 等待过程中和完成后都要截图。
+- 如果回答超过一个视口，向上和向下滚动，截取所有隐藏内容。截图之间保持重叠，避免遗漏行。
+- 根据截图返回答案。可用时附上截图路径或渲染后的截图。
+- 如果文字太小、模糊或被遮挡，通过可见的浏览器控件调整缩放或视口，然后重新截图。
+- 如果任何内容无法从截图中可靠辨认，说明限制，并询问是否继续补充截图。
 
-## ChatGPT Workflow
+## ChatGPT流程
 
-Use this workflow for `https://chatgpt.com/`.
+用于`https://chatgpt.com/`。
 
-1. Find or open ChatGPT:
-   - Inspect visible Chrome tabs through the Chrome plugin's user-tab list only to identify already-open pages by visible title and URL.
-   - If a `https://chatgpt.com/` page is already open, claim and reuse it.
-   - If no ChatGPT tab is open, open `https://chatgpt.com/` in Chrome.
-2. Decide whether to reuse the current conversation:
-   - Look at the visible conversation title, current messages, and left-sidebar history.
-   - If the current visible conversation topic matches the user's current task topic, reuse it.
-   - If the topic does not match, go to step 3.
-3. Start a new chat:
-   - In the left sidebar, find `新聊天` or the equivalent visible new-chat control and click it.
-   - If the sidebar is collapsed, expand it first using the visible sidebar control.
-4. Enter the prompt:
-   - In the right chat area, find the message input box.
-   - Click the input box and type the exact user-provided content.
-5. Select the model:
-   - Look at the model selector near the right side of the input area.
-   - Confirm it shows `PRO`.
-   - If it does not show `PRO`, click the model selector and choose `PRO`.
-   - If `PRO` is not visible, choose `Thinking`.
-   - If neither `PRO` nor `Thinking` is visible, leave the current model unchanged and continue.
-6. Send:
-   - Click the visible send button.
-7. Wait for completion:
-   - Every 5 seconds, take a screenshot and compare it with the previous screenshot visually.
-   - Continue while the answer changes, a stop button is visible, a generating indicator is visible, or new text appears.
-   - Treat output as complete only after the visible answer is unchanged for three consecutive 5-second checks.
-8. Capture and return:
-   - Screenshot the completed reply.
-   - If the reply is not fully visible in one page, scroll to show hidden portions and capture additional overlapping screenshots.
-   - Return the visible answer and include the screenshot path or rendered screenshot when available.
+1. 查找或打开ChatGPT：
+   - 只通过Chrome插件的用户标签页列表查看可见标题和网址，用于识别已经打开的页面。
+   - 如果`https://chatgpt.com/`页面已经打开，接管并复用。
+   - 如果没有ChatGPT标签页，在Chrome中打开`https://chatgpt.com/`。
+2. 判断是否复用当前会话：
+   - 查看可见会话标题、当前消息和左侧历史记录。
+   - 当前可见会话主题与用户任务匹配时，复用该会话。
+   - 主题不匹配时，进入第3步。
+3. 新建对话：
+   - 在左侧边栏找到`新聊天`或等价的可见新建对话控件并点击。
+   - 如果边栏收起，先通过可见边栏控件展开。
+4. 输入提示词：
+   - 在右侧聊天区域找到消息输入框。
+   - 点击输入框，输入用户提供的完整内容。
+5. 选择模型：
+   - 查看输入区域右侧附近的模型选择器。
+   - 确认它显示`PRO`。
+   - 如果没有显示`PRO`，点击模型选择器并选择`PRO`。
+   - 如果看不到`PRO`，选择`Thinking`。
+   - 如果`PRO`和`Thinking`都不可见，保持当前模型不变并继续。
+6. 发送：
+   - 点击可见的发送按钮。
+7. 等待完成：
+   - 每5秒截图一次，并与上一张截图做视觉比较。
+   - 只要回答仍在变化、停止按钮可见、生成指示器可见或出现新文字，就继续等待。
+   - 可见回答连续三次5秒检查都没有变化时，才视为输出完成。
+8. 截取并返回：
+   - 对完成后的回复截图。
+   - 如果回复无法在一页中完整显示，滚动到隐藏部分并补充重叠截图。
+   - 返回可见答案，可用时附上截图路径或渲染后的截图。
 
-## DeepSeek Workflow
+## DeepSeek流程
 
-Use this workflow for `https://chat.deepseek.com/`.
+用于`https://chat.deepseek.com/`。
 
-1. Find or open DeepSeek:
-   - Inspect visible Chrome tabs through the Chrome plugin's user-tab list only to identify already-open pages by visible title and URL.
-   - If a `https://chat.deepseek.com/` page is already open, claim and reuse it.
-   - If no DeepSeek tab is open, open `https://chat.deepseek.com/` in Chrome.
-2. Decide whether to reuse the current conversation:
-   - Look at the visible conversation title, current messages, and left-sidebar history.
-   - If the current visible conversation topic matches the user's current task topic, reuse it.
-   - If the topic does not match, go to step 3.
-3. Start a new conversation:
-   - In the left sidebar, find `开启新对话` and click it.
-   - If the sidebar is collapsed, expand it first using the visible sidebar control.
-4. Configure reasoning mode:
-   - In the right chat area, choose `专家模式`.
-   - Confirm `深度思考` is selected.
-   - If `深度思考` is visible but not selected, click it to select it.
-   - If either control is not visible, inspect the current screen with another screenshot and use the visible equivalent control. If no equivalent exists, leave the current mode unchanged and continue.
-5. Enter the prompt:
-   - Find the message input box.
-   - Click the input box and type the exact user-provided content.
-6. Send:
-   - Click the visible send button.
-7. Wait for completion:
-   - Every 5 seconds, take a screenshot and compare it with the previous screenshot visually.
-   - Continue while the answer changes, a stop button is visible, a generating indicator is visible, or new text appears.
-   - Treat output as complete only after the visible answer is unchanged for three consecutive 5-second checks.
-8. Capture and return:
-   - Screenshot the completed reply.
-   - If the reply is not fully visible in one page, scroll to show hidden portions and capture additional overlapping screenshots.
-   - Return the visible answer and include the screenshot path or rendered screenshot when available.
+1. 查找或打开DeepSeek：
+   - 只通过Chrome插件的用户标签页列表查看可见标题和网址，用于识别已经打开的页面。
+   - 如果`https://chat.deepseek.com/`页面已经打开，接管并复用。
+   - 如果没有DeepSeek标签页，在Chrome中打开`https://chat.deepseek.com/`。
+2. 判断是否复用当前会话：
+   - 查看可见会话标题、当前消息和左侧历史记录。
+   - 当前可见会话主题与用户任务匹配时，复用该会话。
+   - 主题不匹配时，进入第3步。
+3. 新建对话：
+   - 在左侧边栏找到`开启新对话`并点击。
+   - 如果边栏收起，先通过可见边栏控件展开。
+4. 配置推理模式：
+   - 在右侧聊天区域选择`专家模式`。
+   - 确认`深度思考`已选中。
+   - 如果`深度思考`可见但未选中，点击它完成选择。
+   - 如果任一控件不可见，再截一张当前屏幕，并使用可见的等价控件。没有等价控件时，保持当前模式不变并继续。
+5. 输入提示词：
+   - 找到消息输入框。
+   - 点击输入框，输入用户提供的完整内容。
+6. 发送：
+   - 点击可见的发送按钮。
+7. 等待完成：
+   - 每5秒截图一次，并与上一张截图做视觉比较。
+   - 只要回答仍在变化、停止按钮可见、生成指示器可见或出现新文字，就继续等待。
+   - 可见回答连续三次5秒检查都没有变化时，才视为输出完成。
+8. 截取并返回：
+   - 对完成后的回复截图。
+   - 如果回复无法在一页中完整显示，滚动到隐藏部分并补充重叠截图。
+   - 返回可见答案，可用时附上截图路径或渲染后的截图。
 
-## Grok Workflow
+## Grok流程
 
-Use this workflow for Grok inside X.
+用于X中的Grok。
 
-1. Start the Chrome plugin runtime and open a new or selected Chrome tab.
-2. Navigate visually to `https://x.com`.
-3. From the visible page, click the left sidebar item labeled `Grok`. If the layout is compact, use the visible Grok icon or menu item after confirming it from the screenshot.
-4. In the Grok page, click the top-right `New Chat` button. If a welcome screen already shows a fresh input and no existing conversation is active, still look for `New Chat` first before using the current input.
-5. Click the bottom prompt input, type the exact user prompt, and submit it with the visible send control or the keyboard shortcut shown by the UI.
-6. Wait for Grok to finish:
-   - Take repeated screenshots while the reply is changing.
-   - Continue waiting while there is a typing indicator, animated loading state, disabled send control, stop button, streaming cursor, or visibly changing text.
-   - Treat the reply as complete only after the visible answer remains stable across at least two checks separated by a short wait and no generation indicator remains.
-7. Capture the completed answer:
-   - Take a screenshot of the visible completed reply.
-   - If the answer is not fully visible in the current viewport, scroll upward until the beginning of the Grok reply is visible, then take additional screenshots as needed.
-   - Prefer overlapping screenshots when a long answer spans multiple viewports, so no lines are missed.
-8. Return the result:
-   - Provide the Grok answer based on the captured screenshots.
-   - Include the screenshot path or rendered screenshot when available.
-   - If any portion cannot be read confidently from screenshots, state that limitation and ask whether to continue with another screenshot pass.
+1. 启动Chrome插件运行环境，并打开一个新的或已选择的Chrome标签页。
+2. 通过可视化操作进入`https://x.com`。
+3. 从可见页面点击左侧边栏中的`Grok`。如果页面是紧凑布局，先从截图确认Grok图标或菜单项，再点击。
+4. 在Grok页面点击右上角`New Chat`按钮。如果欢迎页已经显示新的输入框且没有现有会话，仍然先寻找`New Chat`，再考虑使用当前输入框。
+5. 点击底部提示词输入框，输入用户的完整提示词，并通过可见发送控件或界面提示的快捷键提交。
+6. 等待Grok完成：
+   - 回复变化期间反复截图。
+   - 只要存在输入指示器、加载动画、不可用的发送控件、停止按钮、流式光标或可见文字变化，就继续等待。
+   - 可见回答在至少两次间隔检查中保持稳定，且没有生成指示器时，才视为回复完成。
+7. 截取完成后的答案：
+   - 对可见的完成回复截图。
+   - 如果答案无法在当前视口完整显示，向上滚动到Grok回复开头可见的位置，再按需补充截图。
+   - 长回答跨多个视口时，优先使用重叠截图，避免遗漏行。
+8. 返回结果：
+   - 根据截图提供Grok答案。
+   - 可用时附上截图路径或渲染后的截图。
+   - 如果任何内容无法从截图中可靠辨认，说明限制，并询问是否继续补充截图。
 
-## Extending To More Agents
+## 扩展更多智能体
 
-When adding another web agent, keep the same structure:
+添加新的网页版智能体时，保持相同结构：
 
-- Add a selection rule under Agent Selection.
-- Add one workflow section with target URL, session reuse rule, new-chat rule, input rule, model or mode selection rule, wait-completion rule, and screenshot capture rule.
-- Keep provider-specific details in that section. Leave shared safety, visual-only, and result-capture rules in the common sections.
+- 在智能体选择部分增加选择规则。
+- 增加一个流程章节，包含目标网址、会话复用规则、新建对话规则、输入规则、模型或模式选择规则、等待完成规则和截图规则。
+- 把服务方特定细节放在该流程章节中。通用安全规则、视觉操作规则和结果截取规则保留在公共章节。
