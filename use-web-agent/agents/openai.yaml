@@ -1,0 +1,4 @@
+interface:
+  display_name: "Use Web Agent"
+  short_description: "Run web agents visually in Chrome"
+  default_prompt: "Use $use-web-agent to run a prompt in ChatGPT, DeepSeek, or Grok and return the visual result."
