@@ -18,7 +18,7 @@ Codex 官方 `$skill-installer` 支持 GitHub repo/path 时，优先直接使用
 |---|---|---|
 | `ai-job-analyze` | `ai-job-analyze/` | 按当前 agent 能力优先使用 Playwright 或 Browser 抓取公开招聘页并分析 AI 岗位，再按需降级到 browser-use、Computer Use 或 Chrome plugin。 |
 | `deepseek-task` | `deepseek-task/` | 使用 OpenAI TypeScript SDK 调用 DeepSeek 执行明确任务；API key 通过本地 setup 页面或环境变量配置，不要求用户把 key 粘贴到对话中。 |
-| `use-web-agent` | `use-web-agent/` | 使用Chrome插件操作用户真实浏览器中的ChatGPT、DeepSeek、Grok等网页版智能体，通过截图判断完成状态并返回可见结果。 |
+| `use-web-agent` | `use-web-agent/` | 使用Chrome插件操作用户真实浏览器中的ChatGPT、DeepSeek、Grok等网页版智能体，通过截图判断完成状态并返回可见文字或图片结果。 |
 
 ## 安装原则
 
