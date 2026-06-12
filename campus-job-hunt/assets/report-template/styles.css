@@ -1,0 +1,297 @@
+:root {
+  color-scheme: light;
+  font-family: Inter, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+  background: #eef2f5;
+  color: #18202a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #eef2f5;
+}
+
+.page {
+  width: 2560px;
+  min-height: 1440px;
+  padding: 88px 108px;
+  background: linear-gradient(180deg, #f8fafb 0%, #eef2f5 100%);
+}
+
+.shell {
+  max-width: 2344px;
+  margin: 0 auto;
+}
+
+.topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  border-bottom: 2px solid #d5dde5;
+  padding-bottom: 36px;
+}
+
+.eyebrow {
+  margin: 0 0 18px;
+  color: #116466;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+h1 {
+  margin: 0;
+  font-size: 74px;
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.context {
+  min-width: 520px;
+  padding: 24px 28px;
+  border: 1px solid #cbd5df;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.context p {
+  margin: 0 0 12px;
+  font-size: 24px;
+  color: #465463;
+}
+
+.context strong {
+  color: #17202b;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.02fr 0.98fr;
+  gap: 32px;
+  margin-top: 36px;
+}
+
+.panel {
+  border: 1px solid #cbd5df;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 34px;
+}
+
+h2 {
+  margin: 0 0 24px;
+  font-size: 34px;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+h3 {
+  margin: 0 0 16px;
+  font-size: 25px;
+  letter-spacing: 0;
+}
+
+.verdict {
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  gap: 26px;
+  align-items: start;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  background: #116466;
+  color: #ffffff;
+  text-align: center;
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1.18;
+}
+
+.one-sentence {
+  margin: 0 0 26px;
+  font-size: 34px;
+  line-height: 1.5;
+  color: #24303d;
+}
+
+.triples {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.mini {
+  min-height: 238px;
+  border: 1px solid #d8e0e8;
+  border-radius: 8px;
+  padding: 22px;
+  background: #f8fafb;
+}
+
+.mini h3 {
+  font-size: 24px;
+  color: #116466;
+}
+
+ul {
+  margin: 0;
+  padding-left: 26px;
+}
+
+li {
+  margin: 0 0 12px;
+  font-size: 23px;
+  line-height: 1.45;
+  color: #3b4653;
+}
+
+.score-head {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 28px;
+  align-items: center;
+  margin-bottom: 26px;
+}
+
+.overall {
+  border-right: 1px solid #d5dde5;
+  padding-right: 28px;
+}
+
+.overall strong {
+  display: block;
+  font-size: 92px;
+  line-height: 1;
+  color: #116466;
+}
+
+.overall span {
+  font-size: 22px;
+  color: #5e6b78;
+}
+
+.improve {
+  font-size: 27px;
+  line-height: 1.45;
+  color: #2e3845;
+}
+
+.score-row {
+  margin: 0 0 22px;
+}
+
+.score-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.score-meta strong {
+  font-size: 25px;
+}
+
+.bar {
+  height: 18px;
+  border-radius: 999px;
+  background: #e3e9ef;
+  overflow: hidden;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.strong {
+  background: #0f7b6c;
+}
+
+.solid {
+  background: #1f7ea8;
+}
+
+.watch {
+  background: #b8872a;
+}
+
+.risk {
+  background: #b24b4b;
+}
+
+.wide {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1.35fr 0.65fr;
+  gap: 32px;
+}
+
+.advice-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.advice-block {
+  border: 1px solid #d8e0e8;
+  border-radius: 8px;
+  padding: 22px;
+  background: #f8fafb;
+  min-height: 298px;
+}
+
+.advice-block h3 {
+  color: #17202b;
+  font-size: 24px;
+}
+
+.advice-block li {
+  font-size: 21px;
+  line-height: 1.42;
+}
+
+.interview {
+  background: #1f2933;
+  color: #ffffff;
+}
+
+.interview h2 {
+  color: #ffffff;
+}
+
+.interview li {
+  color: #e3e9ef;
+}
+
+.muted {
+  color: #788593;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 28px;
+  margin-top: 26px;
+  font-size: 20px;
+  color: #657282;
+}
+
+.brand-mark {
+  flex: 0 0 auto;
+  color: #8a96a3;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
