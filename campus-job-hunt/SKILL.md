@@ -1,6 +1,6 @@
 ---
 name: campus-job-hunt
-description: 面向校招求职的个人执行工作流。适用于用户要做校招目标定位、岗位筛选、简历和项目经历修改、投递计划、笔试面试准备、面试复盘、offer比较和求职进度管理。支持处理用户上传的简历、目标JD附件、截图或文件，解析JD并搜索目标公司和岗位信息，再按定位、结构、贴合度、表达、格式五层诊断SOP评估简历质量和修改优先级。
+description: 面向校招求职的个人执行工作流。适用于用户要做校招目标定位、岗位筛选、简历和项目经历修改、投递计划、笔试面试准备、面试复盘、offer比较和求职进度管理。支持处理用户上传的简历、目标JD附件、截图或文件，解析JD并搜索目标公司和岗位信息，再按定位、结构、贴合度、表达、格式五层诊断SOP评估简历质量和修改优先级，并用HTML报告模板和Playwright生成2K高清诊断图片。
 ---
 
 # 校招求职
@@ -25,12 +25,13 @@ description: 面向校招求职的个人执行工作流。适用于用户要做�
 4. 调研目标公司和岗位：搜索公司业务、岗位方向、校园招聘信息、近期业务动态和岗位同类要求，形成`company_role_brief.md`。
 5. 建立候选人画像：学校、专业、年级、毕业时间、城市偏好、目标岗位、技能栈、项目经历、实习经历、竞赛论文和约束条件。
 6. 诊断简历：读取`references/resume-diagnosis.md`，按定位、结构、贴合度、表达、格式五层诊断SOP判断简历和JD是否匹配、写得是否清楚、修改优先级是什么。
-7. 拆目标岗位：读取`references/targeting.md`，把岗位分为冲刺、主投、保底和探索四类，并写出每类判断依据。
-8. 整理求职材料：读取`references/application-materials.md`，修改简历、项目描述、作品集、邮件、内推说明和自我介绍。
-9. 建投递计划：按公司、岗位、渠道、截止日期、优先级和材料状态建立清单，避免同一岗位重复投递或错投渠道。
-10. 准备笔试面试：读取`references/interview-and-offer.md`，按岗位类型准备技术题、业务题、项目深挖、行为面和反问问题。
-11. 做复盘和下一步：每次笔试、面试或拒信后，更新问题清单、薄弱项、材料修订点和下一轮动作。
-12. 比较offer：按岗位匹配、成长空间、团队质量、城市、薪酬、稳定性、违约风险和长期目标做决策，不只按单一薪资排序。
+7. 生成诊断报告：读取`references/report-rendering.md`，把诊断结论整理成一句话结论、维度评分、分维优化建议和面试整体准备建议，再运行`scripts/render_report.mjs`生成HTML和2K高清PNG。
+8. 拆目标岗位：读取`references/targeting.md`，把岗位分为冲刺、主投、保底和探索四类，并写出每类判断依据。
+9. 整理求职材料：读取`references/application-materials.md`，修改简历、项目描述、作品集、邮件、内推说明和自我介绍。
+10. 建投递计划：按公司、岗位、渠道、截止日期、优先级和材料状态建立清单，避免同一岗位重复投递或错投渠道。
+11. 准备笔试面试：读取`references/interview-and-offer.md`，按岗位类型准备技术题、业务题、项目深挖、行为面和反问问题。
+12. 做复盘和下一步：每次笔试、面试或拒信后，更新问题清单、薄弱项、材料修订点和下一轮动作。
+13. 比较offer：按岗位匹配、成长空间、团队质量、城市、薪酬、稳定性、违约风险和长期目标做决策，不只按单一薪资排序。
 
 ## 输入模板
 
@@ -58,6 +59,8 @@ runs/<run-id>/
 ├── jd_extract.json
 ├── company_role_brief.md
 ├── resume_diagnosis.md
+├── diagnosis_report.html
+├── diagnosis_report.png
 ├── target_map.csv
 ├── resume_review.md
 ├── application_tracker.csv
@@ -80,6 +83,7 @@ runs/<run-id>/
 
 - 处理简历附件、JD附件、截图、文件解析、公司和岗位调研时，读取`references/jd-intake-and-research.md`。
 - 基于目标JD诊断简历是否合适、写得好不好、该怎么改时，读取`references/resume-diagnosis.md`。
+- 生成HTML诊断报告和2K高清PNG图片时，读取`references/report-rendering.md`，并使用`scripts/render_report.mjs`。
 - 做目标岗位、公司梯度和投递优先级时，读取`references/targeting.md`。
 - 修改简历、项目经历、作品集、自我介绍和邮件时，读取`references/application-materials.md`。
 - 准备笔试面试、复盘和offer决策时，读取`references/interview-and-offer.md`。
