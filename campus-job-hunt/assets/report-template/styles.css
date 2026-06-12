@@ -1,8 +1,8 @@
 :root {
   color-scheme: light;
   font-family: Inter, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
-  background: #eef2f5;
-  color: #18202a;
+  background: #e8edf2;
+  color: #17202b;
 }
 
 * {
@@ -11,18 +11,20 @@
 
 body {
   margin: 0;
-  background: #eef2f5;
+  background: #e8edf2;
 }
 
 .page {
-  width: 2560px;
-  min-height: 1440px;
-  padding: 88px 108px;
-  background: linear-gradient(180deg, #f8fafb 0%, #eef2f5 100%);
+  width: 1536px;
+  min-height: 2048px;
+  padding: 58px 64px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.74) 0%, rgba(239, 243, 247, 0.94) 100%),
+    #eef2f5;
 }
 
 .shell {
-  max-width: 2344px;
+  max-width: 1408px;
   margin: 0 auto;
 }
 
@@ -30,37 +32,39 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 40px;
-  border-bottom: 2px solid #d5dde5;
-  padding-bottom: 36px;
+  gap: 26px;
+  border-bottom: 2px solid #d4dde6;
+  padding-bottom: 26px;
 }
 
 .eyebrow {
-  margin: 0 0 18px;
+  margin: 0 0 12px;
   color: #116466;
-  font-size: 26px;
+  font-size: 21px;
   font-weight: 800;
   letter-spacing: 0;
 }
 
 h1 {
   margin: 0;
-  font-size: 74px;
-  line-height: 1.08;
+  font-size: 58px;
+  line-height: 1.06;
   letter-spacing: 0;
 }
 
 .context {
-  min-width: 520px;
-  padding: 24px 28px;
+  width: 456px;
+  padding: 20px 24px;
   border: 1px solid #cbd5df;
   border-radius: 8px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 18px 42px rgba(31, 41, 51, 0.08);
 }
 
 .context p {
-  margin: 0 0 12px;
-  font-size: 24px;
+  margin: 0 0 10px;
+  font-size: 18px;
+  line-height: 1.38;
   color: #465463;
 }
 
@@ -70,35 +74,36 @@ h1 {
 
 .grid {
   display: grid;
-  grid-template-columns: 1.02fr 0.98fr;
-  gap: 32px;
-  margin-top: 36px;
+  grid-template-columns: 1fr;
+  gap: 22px;
+  margin-top: 26px;
 }
 
 .panel {
   border: 1px solid #cbd5df;
   border-radius: 8px;
-  background: #ffffff;
-  padding: 34px;
+  background: rgba(255, 255, 255, 0.93);
+  padding: 26px;
+  box-shadow: 0 18px 42px rgba(31, 41, 51, 0.07);
 }
 
 h2 {
-  margin: 0 0 24px;
-  font-size: 34px;
+  margin: 0 0 18px;
+  font-size: 29px;
   line-height: 1.2;
   letter-spacing: 0;
 }
 
 h3 {
-  margin: 0 0 16px;
-  font-size: 25px;
+  margin: 0 0 12px;
+  font-size: 20px;
   letter-spacing: 0;
 }
 
 .verdict {
   display: grid;
-  grid-template-columns: 230px 1fr;
-  gap: 26px;
+  grid-template-columns: 168px 1fr;
+  gap: 22px;
   align-items: start;
 }
 
@@ -106,103 +111,104 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 210px;
-  height: 210px;
+  width: 152px;
+  height: 152px;
   border-radius: 50%;
-  background: #116466;
+  background: linear-gradient(145deg, #0f6b61 0%, #155c75 100%);
   color: #ffffff;
   text-align: center;
-  font-size: 34px;
+  font-size: 26px;
   font-weight: 900;
   line-height: 1.18;
+  box-shadow: 0 16px 34px rgba(17, 100, 102, 0.22);
 }
 
 .one-sentence {
-  margin: 0 0 26px;
-  font-size: 34px;
-  line-height: 1.5;
+  margin: 0 0 20px;
+  font-size: 29px;
+  line-height: 1.48;
   color: #24303d;
 }
 
 .triples {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  gap: 14px;
 }
 
 .mini {
-  min-height: 238px;
+  min-height: 168px;
   border: 1px solid #d8e0e8;
   border-radius: 8px;
-  padding: 22px;
+  padding: 18px;
   background: #f8fafb;
 }
 
 .mini h3 {
-  font-size: 24px;
+  font-size: 19px;
   color: #116466;
 }
 
 ul {
   margin: 0;
-  padding-left: 26px;
+  padding-left: 22px;
 }
 
 li {
-  margin: 0 0 12px;
-  font-size: 23px;
-  line-height: 1.45;
+  margin: 0 0 8px;
+  font-size: 18px;
+  line-height: 1.42;
   color: #3b4653;
 }
 
 .score-head {
   display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 28px;
+  grid-template-columns: 180px 1fr;
+  gap: 24px;
   align-items: center;
-  margin-bottom: 26px;
+  margin-bottom: 20px;
 }
 
 .overall {
   border-right: 1px solid #d5dde5;
-  padding-right: 28px;
+  padding-right: 24px;
 }
 
 .overall strong {
   display: block;
-  font-size: 92px;
+  font-size: 76px;
   line-height: 1;
   color: #116466;
 }
 
 .overall span {
-  font-size: 22px;
+  font-size: 18px;
   color: #5e6b78;
 }
 
 .improve {
-  font-size: 27px;
+  font-size: 23px;
   line-height: 1.45;
   color: #2e3845;
 }
 
 .score-row {
-  margin: 0 0 22px;
+  margin: 0 0 16px;
 }
 
 .score-meta {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
-  font-size: 24px;
+  margin-bottom: 8px;
+  font-size: 20px;
 }
 
 .score-meta strong {
-  font-size: 25px;
+  font-size: 21px;
 }
 
 .bar {
-  height: 18px;
+  height: 14px;
   border-radius: 999px;
   background: #e3e9ef;
   overflow: hidden;
@@ -230,48 +236,49 @@ li {
   background: #b24b4b;
 }
 
-.wide {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: 1.35fr 0.65fr;
-  gap: 32px;
-}
-
 .advice-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 18px;
+  gap: 14px;
 }
 
 .advice-block {
   border: 1px solid #d8e0e8;
   border-radius: 8px;
-  padding: 22px;
+  padding: 18px;
   background: #f8fafb;
-  min-height: 298px;
+  min-height: 232px;
 }
 
 .advice-block h3 {
   color: #17202b;
-  font-size: 24px;
+  font-size: 19px;
 }
 
 .advice-block li {
-  font-size: 21px;
-  line-height: 1.42;
+  font-size: 17px;
+  line-height: 1.38;
 }
 
 .interview {
-  background: #1f2933;
+  background: linear-gradient(135deg, #1f2933 0%, #243344 100%);
   color: #ffffff;
+  border-color: #273849;
 }
 
 .interview h2 {
   color: #ffffff;
 }
 
+.interview ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 26px;
+}
+
 .interview li {
   color: #e3e9ef;
+  font-size: 18px;
 }
 
 .muted {
@@ -282,16 +289,16 @@ li {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 28px;
-  margin-top: 26px;
-  font-size: 20px;
+  gap: 22px;
+  margin-top: 24px;
+  font-size: 16px;
   color: #657282;
 }
 
 .brand-mark {
   flex: 0 0 auto;
   color: #8a96a3;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0;
 }
