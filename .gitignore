@@ -161,6 +161,9 @@ caffronix-agent-skills/
 # Local-only skill design notes
 DESIGN.md
 
+# Local skill run artifacts
+worldcup-media/runs/
+
 # Spyder project settings
 .spyderproject
 .spyproject

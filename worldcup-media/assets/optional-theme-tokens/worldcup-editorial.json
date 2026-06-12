@@ -1,0 +1,21 @@
+{
+  "name": "worldcup-editorial",
+  "usage": "Optional visual tokens for football editorial cards and vertical storyboards.",
+  "colors": {
+    "paper": "#F4F0E8",
+    "ink": "#151515",
+    "grass": "#1F7A4C",
+    "line": "#C8BCA8",
+    "alert": "#B3261E",
+    "gold": "#C8A24A"
+  },
+  "typography": {
+    "headline": "Use a condensed bold sans-serif or local system fallback.",
+    "body": "Use a readable sans-serif with conservative line height."
+  },
+  "layout": {
+    "cardRadius": 8,
+    "safeMarginPercent": 7,
+    "maxBodyLines": 7
+  }
+}
