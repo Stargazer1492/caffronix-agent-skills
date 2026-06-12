@@ -1,4 +1,4 @@
 interface:
   display_name: "校招求职"
-  short_description: "校招简历和JD解析、简历诊断、报告图片生成和面试复盘"
+  short_description: "校招JD深度分析、简历诊断、报告图片生成和面试复盘"
   default_prompt: "Use $campus-job-hunt to diagnose my resume against a target JD and plan next steps."

@@ -21,8 +21,38 @@
           </div>
         </header>
         <section class="grid">
+          <article class="panel jd-panel">
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">第一步</p>
+                <h2>JD深度分析</h2>
+              </div>
+              <span>公司 · 岗位 · 考察重点</span>
+            </div>
+            <div class="jd-grid">
+              <div class="jd-copy">
+                <h3>公司和岗位判断</h3>
+                <p><strong>公司背景</strong>{{COMPANY_PROFILE}}</p>
+                <p><strong>岗位理解</strong>{{ROLE_ANALYSIS}}</p>
+              </div>
+              <div class="focus-box">
+                <h3>重点考察能力</h3>
+                <div class="tag-list">{{ASSESSMENT_FOCUS}}</div>
+              </div>
+              <div class="question-box">
+                <h3>推断高频问题</h3>
+                <ul>{{HIGH_FREQUENCY_QUESTIONS}}</ul>
+              </div>
+            </div>
+          </article>
           <article class="panel">
-            <h2>一句话结论</h2>
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">第二步</p>
+                <h2>简历诊断结果</h2>
+              </div>
+              <span>五层诊断SOP</span>
+            </div>
             <div class="verdict">
               <div class="badge">{{MATCH_LEVEL}}</div>
               <div>
@@ -46,12 +76,18 @@
             </div>
             {{SCORE_ROWS}}
           </article>
-          <article class="panel advice-panel">
-            <h2>不同维度的优化建议</h2>
-            <div class="advice-grid">{{ADVICE_BLOCKS}}</div>
+          <article class="panel rank-panel">
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">第三步</p>
+                <h2>按严重程度排序的改进建议</h2>
+              </div>
+              <span>从高到低执行</span>
+            </div>
+            <div class="rank-grid">{{RANKED_ADVICE}}</div>
           </article>
           <article class="panel interview">
-            <h2>面试整体准备建议</h2>
+            <h2>面试准备补充</h2>
             <ul>{{INTERVIEW_PREPARATION}}</ul>
           </article>
         </section>
