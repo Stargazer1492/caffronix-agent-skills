@@ -55,7 +55,7 @@ HTML报告必须包含四个部分：
 
 ## 渲染命令
 
-从诊断JSON生成HTML和2K PNG：
+从诊断JSON生成HTML和3:4竖版2K PNG：
 
 ```bash
 node campus-job-hunt/scripts/render_report.mjs \
@@ -63,8 +63,8 @@ node campus-job-hunt/scripts/render_report.mjs \
   --out-dir campus-job-hunt/runs/<run-id> \
   --html diagnosis_report.html \
   --png diagnosis_report.png \
-  --width 2560 \
-  --height 1440
+  --width 1536 \
+  --height 2048
 ```
 
 生成demo：
@@ -82,8 +82,9 @@ campus-job-hunt/runs/demo/diagnosis_report.png
 
 ## 视觉规则
 
-- 画布宽度默认2560px，适合2K高清截图。
+- 画布默认`1536 x 2048`，使用3:4竖版比例，适合移动端查看和社交平台分享。
 - 报告应为信息密度高的专业诊断页，不做营销落地页。
+- 竖版报告优先使用上中下结构：顶部结论，中部评分和关键建议，底部面试准备。
 - 不使用装饰性渐变球、夸张英雄区或大面积单一色系。
 - 分数和建议必须可扫描，避免长段落堆叠。
 - 结论要直给，不用夸张词。

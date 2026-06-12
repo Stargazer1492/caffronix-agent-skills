@@ -11,7 +11,7 @@
       <div class="shell">
         <header class="topline">
           <div>
-            <p class="eyebrow">Campus Job Hunt Resume Diagnosis</p>
+            <p class="eyebrow">校招求职 · 简历诊断</p>
             <h1>校招简历诊断报告</h1>
           </div>
           <div class="context">
@@ -42,20 +42,18 @@
                 <strong>{{OVERALL_SCORE}}</strong>
                 <span>总体分</span>
               </div>
-              <div class="improve">修复URGENT和CRITICAL问题后，预计可提升至 <strong>{{PROJECTED_IMPROVEMENT}}</strong> 分。</div>
+              <div class="improve">修复高优先级问题后，预计可提升至 <strong>{{PROJECTED_IMPROVEMENT}}</strong> 分。</div>
             </div>
             {{SCORE_ROWS}}
           </article>
-          <div class="wide">
-            <article class="panel">
-              <h2>不同维度的优化建议</h2>
-              <div class="advice-grid">{{ADVICE_BLOCKS}}</div>
-            </article>
-            <article class="panel interview">
-              <h2>面试整体准备建议</h2>
-              <ul>{{INTERVIEW_PREPARATION}}</ul>
-            </article>
-          </div>
+          <article class="panel advice-panel">
+            <h2>不同维度的优化建议</h2>
+            <div class="advice-grid">{{ADVICE_BLOCKS}}</div>
+          </article>
+          <article class="panel interview">
+            <h2>面试整体准备建议</h2>
+            <ul>{{INTERVIEW_PREPARATION}}</ul>
+          </article>
         </section>
         <footer class="footer">
           <span>本报告基于目标JD、公司岗位调研和简历可读取内容生成。分数用于排序修改优先级，不承诺录用结果。</span>

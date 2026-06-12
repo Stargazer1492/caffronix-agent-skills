@@ -17,7 +17,7 @@ Codex 官方 `$skill-installer` 支持 GitHub repo/path 时，优先直接使用
 | skill 名称 | 源目录 | 说明 |
 |---|---|---|
 | `ai-job-analyze` | `ai-job-analyze/` | 按当前 agent 能力优先使用 Playwright 或 Browser 抓取公开招聘页并分析 AI 岗位，再按需降级到 browser-use、Computer Use 或 Chrome plugin。 |
-| `campus-job-hunt` | `campus-job-hunt/` | 面向校招求职的个人执行工作流，覆盖简历和JD附件解析、公司岗位调研、简历诊断、HTML报告与2K图片生成、投递管理、面试复盘和offer比较。 |
+| `campus-job-hunt` | `campus-job-hunt/` | 面向校招求职的个人执行工作流，覆盖简历和JD附件解析、公司岗位调研、简历诊断、HTML报告与3:4竖版2K图片生成、投递管理、面试复盘和offer比较。 |
 | `deepseek-task` | `deepseek-task/` | 使用 OpenAI TypeScript SDK 调用 DeepSeek 执行明确任务；API key 通过本地 setup 页面或环境变量配置，不要求用户把 key 粘贴到对话中。 |
 | `use-web-agent` | `use-web-agent/` | 使用Chrome插件操作用户真实浏览器中的ChatGPT、DeepSeek、Grok等网页版智能体，通过截图判断完成状态并返回可见文字或图片结果。 |
 | `worldcup-media` | `worldcup-media/` | 面向世界杯内容生产，编排实时素材检索、来源归一、事实分级、小红书卡片策划、HyperFrames竖屏视频工程生成和MP4渲染。 |
