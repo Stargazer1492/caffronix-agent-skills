@@ -23,12 +23,12 @@
 
 `work/{run_id}/` 保存采集和归一化中间产物。`reports/{run_id}/` 保存最终交付物。
 
-`report.html` 是默认必需产物。`report.png` 只有用户要求图片、分享图或配置启用图片导出时生成。
+`report.html` 是默认必需产物。`report.png` 只有用户要求图片、分享图，或配置启用图片导出时生成。
 
 ## 必需性
 
 - `crawl_plan.json`：必需。记录本次计划采集哪些公司、渠道、关键词、source 和数量上限。
-- `crawl_result.json`：必需。记录实际采集结果、成功 source、失败 source、样本数量、使用的浏览器能力和安全策略阻断情况。
+- `crawl_result.json`：必需。记录实际采集结果、成功来源、失败来源、样本数量、使用的浏览器能力和安全策略阻断情况。
 - `jobs_index.jsonl`：必需。记录已采集岗位索引和详情文件路径，不重复保存详情正文。
 - `failures.jsonl`：有失败时必需；无失败时可以不存在，也可以保留空文件，但同一次运行内要保持一致。
 - `details/{job_id}.txt`：每个成功进入详情页的岗位必需。保存详情页可见正文。
@@ -101,11 +101,11 @@
 }
 ```
 
-`collection_methods` 使用以下枚举：`playwright`、`codex-browser`、`browser-use`、`computer-use`、`chrome-plugin`。
+`collection_methods` 使用以下枚举值：`playwright`、`codex-browser`、`browser-use`、`computer-use`、`chrome-plugin`。
 
 ## 岗位索引
 
-采集阶段输出 `jobs_index.jsonl`，每行一个岗位索引。详情正文只保存在 `details/{job_id}.txt`，不要在索引里重复保存全文。
+采集阶段输出 `jobs_index.jsonl`，每行一个岗位索引。详情正文只保存在 `details/{job_id}.txt`，不要在索引中重复保存全文。
 
 ```json
 {
@@ -187,7 +187,7 @@
 
 ## 结构化报告
 
-报告阶段输出 `report.json`，再基于它渲染 `report.html`。不要单独生成 `insights.json`。
+报告阶段先输出 `report.json`，再基于它渲染 `report.html`。不要单独生成 `insights.json`。
 
 ```json
 {

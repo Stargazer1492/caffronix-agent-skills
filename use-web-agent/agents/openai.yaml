@@ -1,0 +1,4 @@
+interface:
+  display_name: "使用网页版智能体"
+  short_description: "在Chrome中通过视觉操作网页智能体并生成图片"
+  default_prompt: "使用 $use-web-agent 在ChatGPT、DeepSeek或Grok中运行提示词，或用网页版ChatGPT生成图片，并返回视觉截图结果。"
